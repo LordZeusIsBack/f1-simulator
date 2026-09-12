@@ -1,10 +1,25 @@
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
+from enum import Enum
+
+
+@dataclass
+class CarSpecification:
+    power: float
+    drag: float
+    downforce: float
+
+
+@dataclass
+class TrackSegment:
+    length: float
+    radius: float
+    gradient: float
 
 
 class Track(ABC):
     def __init__(self):
-        self.segments = []
+        self.segments: list[TrackSegment] = []
         self.build_track()
 
     @abstractmethod
@@ -17,15 +32,6 @@ class Track(ABC):
 
 
 
-@dataclass
-class TrackSegment:
-    length: float
-    radius: float
-    elevation: float
-    grip: float
-
-
-
 class Straight(TrackSegment):
     pass
 
@@ -33,3 +39,17 @@ class Straight(TrackSegment):
 
 class Corner(TrackSegment):
     pass
+
+
+
+class Car:
+    def __init__(self, specification: CarSpecification):
+        self.specification = specification
+
+
+class TyreCompound(Enum):
+    SOFT = "soft"
+    MEDIUM = "medium"
+    HARD = "hard"
+    INTERMEDIATE = "intermediate"
+    WET = "wet"
