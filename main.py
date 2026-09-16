@@ -1,5 +1,11 @@
+from tracks import Monza
+
+
 def main():
-    print("Hello from f1-simulator!")
+    monza = Monza()
+
+    print(monza.name)
+    print(monza.length)
 
 
 if __name__ == "__main__":
