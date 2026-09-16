@@ -30,6 +30,10 @@ class Track(ABC):
     def name(self):
         return self.__class__.__name__
 
+    @property
+    def length(self):
+        return sum(segment.length for segment in self.segments)
+
 
 
 class Straight(TrackSegment):
