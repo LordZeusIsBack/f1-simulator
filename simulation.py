@@ -5,13 +5,19 @@ from physics import acceleration, corner_speed, deceleration
 STEP = 1.0  # m, track resolution
 
 
-def simulate_lap(car, track):
-    """Flying lap. Returns (lap time in s, speed in m/s at each track point)."""
-    spec = car.specification
-    points = []  # (distance to next point, radius, gradient)
+def track_points(track):
+    """Split the track into ~STEP-long pieces: (distance to next point, radius, gradient) per point."""
+    points = []
     for segment in track.segments:
         n = max(1, round(segment.length / STEP))
         points += [(segment.length / n, segment.radius, segment.gradient)] * n
+    return points
+
+
+def simulate_lap(car, track):
+    """Flying lap. Returns (lap time in s, speed in m/s at each track point)."""
+    spec = car.specification
+    points = track_points(track)
     n = len(points)
     limit = [corner_speed(spec, radius) for _, radius, _ in points]
 

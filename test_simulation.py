@@ -1,8 +1,10 @@
 import math
 
 from abstract_classes import Car, CarSpecification, Corner, Straight, Track
+from cars import CARS
 from physics import G, corner_speed
 from simulation import simulate_lap
+from tracks import Monza
 
 
 class Stadium(Track):
@@ -17,6 +19,15 @@ def test_car_brakes_down_to_grip_limit():
     assert all((a * a - b * b) / 2 < 10 * G for a, b in zip(speed, speed[1:]))  # no 10 g stops
 
 
+def test_monza_lap_times_unchanged_from_v0():
+    # recorded from V0 (commit 76f1562): a regression guard, not a validation against real F1
+    v0 = {"Red Bull": 94.55456328563695, "Ferrari": 95.19614020957577,
+          "McLaren": 93.9983425811837, "Mercedes": 95.290917425722}
+    for team, car in CARS.items():
+        assert math.isclose(simulate_lap(car, Monza())[0], v0[team], rel_tol=1e-12)
+
+
 if __name__ == "__main__":
     test_car_brakes_down_to_grip_limit()
+    test_monza_lap_times_unchanged_from_v0()
     print("ok")
