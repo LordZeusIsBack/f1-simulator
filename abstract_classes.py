@@ -8,6 +8,7 @@ class CarSpecification:
     power: float
     drag: float
     downforce: float
+    mass: float = 800
 
 
 @dataclass
