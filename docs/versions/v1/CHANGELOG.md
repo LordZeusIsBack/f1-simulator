@@ -6,7 +6,7 @@
 |---|---|
 | Branch | `ai-agent-branch` (never `main`) |
 | Parent (V0 baseline) | `76f1562` "Added code for simulation testing" |
-| V1 version commit | `PENDING` — see note |
+| V1 version commit | `3fbf3508bf42ac0523218977797e0505f9f4989c` (`3fbf350`) |
 | Commit message | `feat(v1): add multi-car race simulation` |
 
 **Note on the hash.** A Git commit's hash is computed from its contents, so a file cannot contain the hash of the commit it is in. If the hash were written in and the commit amended, the amended commit would get a new hash and the recorded one would point at a commit that was never pushed.
