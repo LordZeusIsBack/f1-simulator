@@ -1,23 +1,44 @@
 import math
 from unittest import TestCase
 
-from abstract_classes import Car, CarSpecification
+from abstract_classes import Car, CarSpecification, TyreCompound
+from cars import CARS
+from physics import TYRE_GRIP
 from race import GRID_SPACING, LapProfile, Race, RaceCar
 from simulation import simulate_lap
 from test_simulation import Stadium
+from tracks import Monza
+from tyres import Compound
 
 assert_raises = TestCase().assertRaises
 FAST = Car(CarSpecification(power=750_000, drag=1.2, downforce=3.5))
 SLOW = Car(CarSpecification(power=500_000, drag=1.2, downforce=3.5))
+V1_TYRES = {TyreCompound.MEDIUM: Compound(TYRE_GRIP, wear_per_lap=0.0)}
+
+
+def v1_race(track, laps, grid):
+    """V1 behaviour is V2 with fuel burn and tyre wear switched off."""
+    return Race(track, laps, grid, fuel_per_lap=0.0, compounds=V1_TYRES)
 
 
 def lap_time(car):
     return simulate_lap(car, Stadium())[0]
 
 
+def test_v1_monza_race_results_unchanged():
+    # recorded from V1 (commit 3fbf350): 53 laps, 8 cars, two per team in CARS order
+    v1 = {1: 5011.391854138659, 2: 5011.534385461075, 3: 5045.687502825008, 4: 5045.833538683694,
+          5: 4982.460995837225, 6: 4982.598205595793, 7: 5051.314782433612, 8: 5051.46414224547}
+    entries = [(team, car) for team, car in CARS.items() for _ in range(2)]
+    grid = [RaceCar(number, team, car) for number, (team, car) in enumerate(entries, start=1)]
+    v1_race(Monza(), 53, grid).run(0.5)
+    for car in grid:
+        assert math.isclose(car.finish_time, v1[car.number], abs_tol=1e-6)
+
+
 def test_grid_puts_cars_behind_the_line_in_given_order():
     grid = [RaceCar(44, "A", FAST), RaceCar(1, "B", FAST), RaceCar(16, "C", FAST)]
-    race = Race(Stadium(), 3, grid)
+    race = v1_race(Stadium(), 3, grid)
     assert [car.distance for car in grid] == [0.0, -GRID_SPACING, -2 * GRID_SPACING]
     assert race.time == 0.0 and not race.finished
     assert race.standings() == grid
@@ -26,7 +47,7 @@ def test_grid_puts_cars_behind_the_line_in_given_order():
 
 def test_team_mates_share_the_car_but_not_the_race_state():
     first, second = RaceCar(1, "Team", FAST), RaceCar(2, "Team", FAST)
-    race = Race(Stadium(), 2, [first, second])
+    race = v1_race(Stadium(), 2, [first, second])
     for _ in range(20):
         race.step(0.5)
     assert first.car is second.car
@@ -38,7 +59,7 @@ def test_team_mates_share_the_car_but_not_the_race_state():
 
 def test_positions_follow_progress_not_grid_order():
     slow, fast = RaceCar(1, "Slow", SLOW), RaceCar(2, "Fast", FAST)
-    race = Race(Stadium(), 5, [slow, fast])
+    race = v1_race(Stadium(), 5, [slow, fast])
     assert race.standings() == [slow, fast]
     race.run(0.5)
     assert race.standings() == [fast, slow]
@@ -47,7 +68,7 @@ def test_positions_follow_progress_not_grid_order():
 
 def test_running_cars_are_ordered_by_distance_and_finished_cars_lead():
     a, b, c = RaceCar(1, "A", FAST), RaceCar(2, "B", FAST), RaceCar(3, "C", FAST)
-    race = Race(Stadium(), 1, [a, b, c])
+    race = v1_race(Stadium(), 1, [a, b, c])
     a.distance, b.distance, c.distance = 100.0, 300.0, 200.0
     assert race.standings() == [b, c, a]
     a.distance, a.finish_time = race.race_distance, 50.0
@@ -56,7 +77,7 @@ def test_running_cars_are_ordered_by_distance_and_finished_cars_lead():
 
 def test_single_car_race_lasts_laps_times_the_v0_lap_time():
     car = RaceCar(1, "Solo", FAST)
-    race = Race(Stadium(), 3, [car])
+    race = v1_race(Stadium(), 3, [car])
     assert race.run(0.5) == [car]
     assert race.finished and race.laps_completed(car) == 3
     assert car.distance == race.race_distance
@@ -65,7 +86,7 @@ def test_single_car_race_lasts_laps_times_the_v0_lap_time():
 
 def test_lap_is_counted_when_the_car_crosses_the_line():
     car = RaceCar(1, "Solo", FAST)
-    race = Race(Stadium(), 2, [car])
+    race = v1_race(Stadium(), 2, [car])
     race.step(lap_time(FAST) - 0.01)
     assert race.laps_completed(car) == 0
     race.step(0.02)
@@ -74,7 +95,7 @@ def test_lap_is_counted_when_the_car_crosses_the_line():
 
 def test_race_ends_only_when_every_car_has_completed_all_laps():
     grid = [RaceCar(1, "Fast", FAST), RaceCar(2, "Slow", SLOW)]
-    race = Race(Stadium(), 2, grid)
+    race = v1_race(Stadium(), 2, grid)
     while grid[0].finish_time is None:
         race.step(0.5)
     assert not race.finished and race.laps_completed(grid[1]) < 2
@@ -86,7 +107,7 @@ def test_race_ends_only_when_every_car_has_completed_all_laps():
 def test_results_do_not_depend_on_step_size():
     def finish_times(dt):
         grid = [RaceCar(1, "Fast", FAST), RaceCar(2, "Slow", SLOW), RaceCar(3, "Fast", FAST)]
-        return [car.finish_time for car in Race(Stadium(), 4, grid).run(dt)]
+        return [car.finish_time for car in v1_race(Stadium(), 4, grid).run(dt)]
 
     for coarse, fine in zip(finish_times(3.0), finish_times(0.05)):
         assert math.isclose(coarse, fine, abs_tol=1e-6)
@@ -95,7 +116,7 @@ def test_results_do_not_depend_on_step_size():
 def test_same_inputs_give_identical_results():
     def result():
         grid = [RaceCar(1, "Fast", FAST), RaceCar(2, "Slow", SLOW)]
-        return [(car.number, car.finish_time) for car in Race(Stadium(), 3, grid).run(0.5)]
+        return [(car.number, car.finish_time) for car in v1_race(Stadium(), 3, grid).run(0.5)]
 
     assert result() == result()
 
@@ -111,12 +132,12 @@ def test_lap_profile_reproduces_the_v0_lap_and_inverts():
 def test_invalid_race_configuration_is_rejected():
     for laps in (0, -1, 2.5, "3"):
         with assert_raises(ValueError):
-            Race(Stadium(), laps, [RaceCar(1, "A", FAST)])
+            v1_race(Stadium(), laps, [RaceCar(1, "A", FAST)])
     with assert_raises(ValueError):
-        Race(Stadium(), 3, [])
+        v1_race(Stadium(), 3, [])
     with assert_raises(ValueError):
-        Race(Stadium(), 3, [RaceCar(1, "A", FAST), RaceCar(1, "B", FAST)])
-    race = Race(Stadium(), 3, [RaceCar(1, "A", FAST)])
+        v1_race(Stadium(), 3, [RaceCar(1, "A", FAST), RaceCar(1, "B", FAST)])
+    race = v1_race(Stadium(), 3, [RaceCar(1, "A", FAST)])
     for dt in (0, -0.5):
         with assert_raises(ValueError):
             race.step(dt)
