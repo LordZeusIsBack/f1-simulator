@@ -6,7 +6,7 @@
 |---|---|
 | Branch | `ai-agent-branch` (never `main`) |
 | Parent (V1) | `0794850` "docs(v1): record version commit hash in changelog" (V1 code is in `3fbf350`) |
-| V2 version commit | `PENDING` |
+| V2 version commit | `908961f69e2bdd79507419a91015f3982563991e` (`908961f`) |
 | Commit message | `feat(v2): add tyres, fuel and pit strategy` |
 
 As in V1, a commit cannot contain its own hash. The hash is therefore filled in by a follow-up commit, `docs(v2): record version commit hash in changelog`, which changes only this table.
