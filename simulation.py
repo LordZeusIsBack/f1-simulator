@@ -1,0 +1,31 @@
+import math
+
+from physics import acceleration, corner_speed, deceleration
+
+STEP = 1.0  # m, track resolution
+
+
+def simulate_lap(car, track):
+    """Flying lap. Returns (lap time in s, speed in m/s at each track point)."""
+    spec = car.specification
+    points = []  # (distance to next point, radius, gradient)
+    for segment in track.segments:
+        n = max(1, round(segment.length / STEP))
+        points += [(segment.length / n, segment.radius, segment.gradient)] * n
+    n = len(points)
+    limit = [corner_speed(spec, radius) for _, radius, _ in points]
+
+    # Each pass runs two laps: the first only sets the speed at the line.
+    speed = [0.0] * n
+    v = 0.0
+    for k in range(2 * n):  # full throttle out of every corner
+        i = k % n
+        ds, radius, gradient = points[i - 1]
+        v = speed[i] = min(limit[i], math.sqrt(v * v + 2 * acceleration(spec, v, radius, gradient) * ds))
+    for k in reversed(range(2 * n)):  # brake late enough to make every corner
+        i = k % n
+        ds, radius, gradient = points[i]
+        v = speed[i] = min(speed[i], math.sqrt(v * v + 2 * deceleration(spec, v, radius, gradient) * ds))
+
+    lap_time = sum(2 * points[i - 1][0] / (speed[i - 1] + speed[i]) for i in range(n))
+    return lap_time, speed
