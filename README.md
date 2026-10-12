@@ -2,9 +2,9 @@
 
 A Python simulation of Formula 1 cars racing around a track. It grows one small, documented version at a time, towards a platform for race-strategy and reinforcement-learning experiments.
 
-The physics, car parameters, track geometry, tyre and fuel values, traffic rules, weather model and race-control rules are **simplified placeholders**. Results are not validated against real F1 data; see the limitations in each version's docs.
+The physics, car parameters, track geometry, tyre and fuel values, traffic rules, weather model and race-control rules are **simplified placeholders**. V6 measures how far the model is from real F1 timing data. At Monza the baseline lap is about 19 % too slow; see [Validation](#validation-v6).
 
-## Current version: V5 — race control, incidents and penalties
+## Current version: V6 — calibration and validation
 
 - **V0:** a simplified physics model computes a flying-lap speed profile and lap time for one car.
 - **V1:** several cars start from a grid and race a set number of laps, with positions, laps and gaps.
@@ -16,12 +16,18 @@ The physics, car parameters, track geometry, tyre and fuel values, traffic rules
 
   Drivers have `pace` and `racecraft`. Every pass and refused attempt is logged.
 - **V4:** a scripted weather timeline sets air temperature and rain. Track wetness rises and falls smoothly, and wetness costs slicks far more grip than intermediates or wets, so the best tyre changes. Strategies can react by pitting for better tyres. Rain changes and changes of the best tyre are logged.
-- **V5 (new):** race control:
+- **V5:** race control:
   - a local yellow, a Virtual Safety Car and a Safety Car, each with defined effects and a defined end;
   - scripted incidents that call flags and/or retire cars;
   - time and drive-through penalties, and a two-dry-compound rule;
   - a race-control event log;
   - a classification by race time including penalties, with retired cars at the bottom.
+- **V6 (new):** no new simulator features. V6 adds:
+  - a parameter audit;
+  - a small real dataset (Monza 2024 and 2025, Jolpica-F1 / Ergast);
+  - a repeatable validation workflow;
+  - a 2-parameter calibration on 2024, evaluated on held-out 2025, with the baseline kept;
+  - a generated report.
 
 ## Requirements and setup
 
@@ -352,6 +358,33 @@ What happens:
 - **The 5 s penalty costs #2 a place.** #2 crosses the line 0.7 s ahead of #5 but is classified behind it.
 - **The retired #3 is classified last.**
 
+## Validation (V6)
+
+The comparison uses the real public timing data from the 2024 and 2025 Italian GPs in `data/reference/raw/`.
+
+- **Source:** Jolpica-F1 API (Ergast-compatible), accessed 2026-10-12.
+- **Licence:** **CC BY-NC-SA 4.0**, non-commercial use only. See [data/reference/README.md](data/reference/README.md).
+
+Everything below runs offline from the committed files:
+
+```bash
+python3 -m validation.calibrate    # fit tyre_grip and pit_loss on 2024 only -> validation/config/calibrated.json
+python3 -m validation.evaluate     # baseline and calibrated vs 2024 and 2025 -> validation/reports/validation_report.md (about 8 s)
+python3 test_validation.py         # data checks, metrics, reproducibility, "report is up to date" (about 12 s)
+python3 -m validation.fetch_reference   # optional: re-download the raw data (needs internet)
+```
+
+Headline results (full numbers in [the report](validation/reports/validation_report.md)):
+
+| Check | Baseline | Calibrated, on held-out 2025 |
+|---|---|---|
+| Monza length | +107 m (+1.85 %) | not calibrated |
+| Qualifying lap (4 teams), MAE | 15.8 s (≈ 20 % slow) | 0.52 s, but the fastest team is wrong |
+| Pit loss against the measured median | −3.4 s | +0.26 s |
+| Winner's race time | +16.8 % | −2.1 % |
+
+The calibrated grip (2.94) is an **effective** value that absorbs other model errors; it is not a real tyre property. The simulator defaults are unchanged. See [V6 IMPLEMENTATION.md](docs/versions/v6/IMPLEMENTATION.md) for what can and cannot be validated.
+
 ## Testing
 
 ```bash
@@ -360,7 +393,8 @@ python3 test_race.py            # V1 race behaviour (run with fuel and wear off)
 python3 test_tyres_fuel_pits.py # V2 tyres, fuel, pit stops, strategies + V2 result regression (traffic off)
 python3 test_traffic.py         # V3 drivers, nearby cars, dirty air, DRS, overtaking + V3 result regression
 python3 test_weather.py         # V4 weather state, wetting/drying, wet grip, tyre suitability, rain mid-race
-python3 test_race_control.py    # V5 flags and transitions, VSC/SC, retirements, penalties, event order + V4 regression
+python3 test_race_control.py    # V5 flags and transitions, VSC/SC, retirements, penalties, event order + V4/V5 regression
+python3 test_validation.py      # V6 reference data, metrics, calibration reproducibility, report up to date
 ```
 
 Each file prints `ok` when all its tests pass. An assertion error means a test failed. The tests are plain `test_*` functions using only the standard library.
@@ -382,6 +416,8 @@ Each file prints `ok` when all its tests pass. An assertion error means a test f
 | `race_control.py` | `Flag`, `RaceControlRules`, `Incident`, `Penalty`, `ControlEvent`, `RaceControl` |
 | `race.py` | `RaceCar`, `OvertakeEvent`, `WeatherEvent`, `PitEvent`, `LapProfile`, `Race` |
 | `main.py` | Entry point |
+| `validation/` | V6 tooling: `fetch_reference`, `reference` (load/convert), `metrics`, `model`, `calibrate`, `evaluate`, `config/`, `reports/` |
+| `data/reference/` | V6 reference data (raw API responses) and its provenance |
 | `test_*.py` | Tests |
 
 ## Version documentation
@@ -394,7 +430,8 @@ Each file prints `ok` when all its tests pass. An assertion error means a test f
 | V3 | [Implementation](docs/versions/v3/IMPLEMENTATION.md) · [Code flow](docs/versions/v3/CODE_FLOW.md) · [Changelog](docs/versions/v3/CHANGELOG.md) |
 | V4 | [Implementation](docs/versions/v4/IMPLEMENTATION.md) · [Code flow](docs/versions/v4/CODE_FLOW.md) · [Changelog](docs/versions/v4/CHANGELOG.md) |
 | V5 | [Implementation](docs/versions/v5/IMPLEMENTATION.md) · [Code flow](docs/versions/v5/CODE_FLOW.md) · [Changelog](docs/versions/v5/CHANGELOG.md) |
+| V6 | [Implementation](docs/versions/v6/IMPLEMENTATION.md) · [Code flow](docs/versions/v6/CODE_FLOW.md) · [Changelog](docs/versions/v6/CHANGELOG.md) |
 
 ## Roadmap
 
-V6 calibration and validation · V7 reinforcement-learning interface · V8 advanced strategy research.
+V7 reinforcement-learning interface · V8 advanced strategy research.

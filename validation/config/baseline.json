@@ -1,0 +1,5 @@
+{
+  "description": "V0-V5 values as written in physics.py (TYRE_GRIP) and race.py (PIT_LOSS); placeholders, never fitted",
+  "pit_loss": 22.0,
+  "tyre_grip": 1.8
+}

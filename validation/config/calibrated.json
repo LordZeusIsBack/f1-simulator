@@ -1,0 +1,14 @@
+{
+  "baseline": {
+    "pit_loss": 22.0,
+    "tyre_grip": 1.8
+  },
+  "description": "Effective values fitted to the 2024 Italian GP (Monza) only; 2025 is held out for evaluation",
+  "method": {
+    "pit_loss": "median of 14 measured 2024 stops (in-lap + out-lap - 2 x clean pace)",
+    "tyre_grip": "bisection on [1.0, 5.0] to 0.0001: zero mean error of the 4 model cars' flying laps against each team's best 2024 qualifying lap"
+  },
+  "pit_loss": 25.62,
+  "trained_on": "2024 Italian Grand Prix, data/reference/raw/2024_*.json",
+  "tyre_grip": 2.9358
+}

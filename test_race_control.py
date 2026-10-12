@@ -288,6 +288,24 @@ def test_v4_race_results_unchanged_without_race_control():
     assert [car.finish_time for car in grid2] == [car.finish_time for car in grid] and r2.overtakes == r.overtakes
 
 
+
+def test_v5_race_results_unchanged():
+    # recorded from V5 (commit e22ce77): retirement + yellow, safety car, time penalty, drive-through, two-compound rule
+    grid = [RaceCar(1, "A", FAST, Strategy(MEDIUM, 8 * 1.9, (PitStop(4, HARD),))), RaceCar(2, "B", FAST),
+            RaceCar(3, "C", SLOW), RaceCar(4, "D", FAST)]
+    control = RaceControl([Incident(40, Flag.YELLOW, 15, retire=4), Incident(90, Flag.SAFETY_CAR, 30)],
+                          [Penalty(20, 2, "time", 5), Penalty(30, 3, "drive-through")])
+    race = Race(Stadium(), 8, grid, race_control=control)
+    race.run(0.1)
+    v5 = {1: (223.03272013081406, 0.0), 2: (211.8308897669547, 35.0), 3: (236.92455707458856, 30.0)}
+    for number, (finish, penalty) in v5.items():
+        assert math.isclose(grid[number - 1].finish_time, finish, abs_tol=1e-6) and grid[number - 1].penalty_time == penalty
+    assert grid[3].finish_time is None and [car.number for car in race.standings()] == [1, 2, 3, 4]
+    assert [(round(e.time, 1), e.kind) for e in control.events] == [
+        (20.0, "penalty"), (30.0, "penalty"), (40.0, "retirement"), (40.0, "flag"), (52.3, "penalty served"),
+        (55.0, "flag"), (90.1, "flag"), (139.6, "flag"), (211.8, "penalty"), (236.9, "penalty")]
+
+
 if __name__ == "__main__":
     for name, test in list(globals().items()):
         if name.startswith("test_"):
