@@ -8,7 +8,7 @@ from strategy import PitStop, Strategy
 from tracks import Monza
 
 RACE_LAPS = 53  # Monza's Grand Prix distance
-DT = 0.5  # s per race step
+DT = 0.1  # s per race step; traffic decisions are made once per step
 
 
 def strategies(laps):
@@ -48,6 +48,17 @@ def print_pit_stops(race):
         )
 
 
+def print_overtakes(race):
+    passes = [event for event in race.overtakes if event.outcome == "passed"]
+    held = sum(event.outcome == "held up" for event in race.overtakes)
+    print(f"\nOvertakes ({len(passes)} passes; cars were held up behind another {held} times)")
+    for event in passes:
+        print(
+            f"lap {event.lap:>2} at {event.time:7.1f} s: #{event.attacker} passed #{event.defender}"
+            f" ({event.advantage:+.1f} m/s, needed {event.required:.1f}{', DRS' if event.drs else ''})"
+        )
+
+
 def main():
     track = Monza()
     print(f"{track.name} ({track.length:.0f} m)")
@@ -72,6 +83,7 @@ def main():
     race.run(DT)
     print_standings(race, f"Final classification, {laps}-lap race")
     print_pit_stops(race)
+    print_overtakes(race)
 
 
 if __name__ == "__main__":

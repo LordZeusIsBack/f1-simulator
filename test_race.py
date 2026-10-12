@@ -17,8 +17,8 @@ V1_TYRES = {TyreCompound.MEDIUM: Compound(TYRE_GRIP, wear_per_lap=0.0)}
 
 
 def v1_race(track, laps, grid):
-    """V1 behaviour is V2 with fuel burn and tyre wear switched off."""
-    return Race(track, laps, grid, fuel_per_lap=0.0, compounds=V1_TYRES)
+    """V1 behaviour: no fuel burn, no tyre wear, no traffic."""
+    return Race(track, laps, grid, fuel_per_lap=0.0, compounds=V1_TYRES, traffic=None)
 
 
 def lap_time(car):

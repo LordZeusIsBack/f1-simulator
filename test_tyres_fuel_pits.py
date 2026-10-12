@@ -5,7 +5,7 @@ from abstract_classes import TyreCompound
 from physics import TYRE_GRIP
 from race import FUEL_CAPACITY, REFUEL_RATE, LapProfile, Race, RaceCar
 from strategy import PitStop, Strategy
-from test_race import FAST, V1_TYRES, lap_time
+from test_race import FAST, SLOW, V1_TYRES, lap_time
 from test_simulation import Stadium
 from tyres import COMPOUNDS, WORN_GRIP_LOSS, Compound, Tyres
 
@@ -155,7 +155,7 @@ def test_results_with_stops_are_deterministic_and_independent_of_step_size():
     def result(dt):
         grid = [RaceCar(1, "A", FAST, Strategy(SOFT, 6 * 1.9, (PitStop(3, HARD, 1.0),))),
                 RaceCar(2, "B", FAST, Strategy(HARD, 6 * 1.9))]
-        race = Race(Stadium(), 6, grid)
+        race = Race(Stadium(), 6, grid, traffic=None)  # V2 exactness: cars ignore each other
         race.run(dt)
         return [car.finish_time for car in grid], race.pit_events
 
@@ -163,6 +163,21 @@ def test_results_with_stops_are_deterministic_and_independent_of_step_size():
     (coarse, coarse_stops), (fine, fine_stops) = result(3.0), result(0.05)
     assert all(math.isclose(a, b, abs_tol=1e-6) for a, b in zip(coarse, fine))
     assert math.isclose(coarse_stops[0].time, fine_stops[0].time, abs_tol=1e-6)
+
+
+
+def test_v2_race_results_unchanged_without_traffic():
+    # recorded from V2 (commit 908961f): four cars, two with stops, cars ignore each other
+    grid = [RaceCar(1, "A", SLOW, Strategy(HARD, 8 * 1.9)),
+            RaceCar(2, "A", SLOW, Strategy(SOFT, 8 * 1.9, (PitStop(4, MEDIUM),))),
+            RaceCar(3, "B", FAST, Strategy(MEDIUM, 4 * 1.9, (PitStop(4, HARD, 4 * 1.9),))),
+            RaceCar(4, "B", FAST)]
+    race = Race(Stadium(), 8, grid, traffic=None)
+    race.run(0.5)
+    v2 = {1: 205.0533860528629, 2: 225.57606833293937, 3: 215.8975745239068, 4: 193.32503984524195}
+    assert all(math.isclose(car.finish_time, v2[car.number], abs_tol=1e-6) for car in grid)
+    assert [(e.number, e.lap) for e in race.pit_events] == [(3, 4), (2, 4)]
+    assert math.isclose(race.pit_events[0].time, 96.54882910906912, abs_tol=1e-6)
 
 
 if __name__ == "__main__":
