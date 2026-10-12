@@ -1,0 +1,6732 @@
+{
+ "config": {
+  "cem": {
+   "bounds": {
+    "final_call": [
+     0.6,
+     0.98
+    ],
+    "neutral_from": [
+     0.0,
+     0.8
+    ],
+    "neutral_to": [
+     0.2,
+     1.0
+    ],
+    "wear_limit": [
+     0.3,
+     1.0
+    ]
+   },
+   "elites": 2,
+   "iterations": 4,
+   "population": 8,
+   "runs": [
+    0,
+    1,
+    2
+   ]
+  },
+  "decision_rule": "A design helps if, in at least 2 of its 3 CEM runs, the 95% bootstrap CI of the paired race-time difference (tuned minus hand-set rule-based, 40 held-out races) lies entirely below 0. Fixed before running.",
+  "designs": {
+   "random": [
+    {
+     "neutralisation_chance": 0.5,
+     "rain_chance": 0.25,
+     "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+     ]
+    }
+   ],
+   "stratified": [
+    {
+     "neutralisation_chance": 0.0,
+     "rain_chance": 0.0,
+     "seeds": [
+      0,
+      1
+     ]
+    },
+    {
+     "neutralisation_chance": 1.0,
+     "rain_chance": 0.0,
+     "seeds": [
+      2,
+      3
+     ]
+    },
+    {
+     "neutralisation_chance": 0.0,
+     "rain_chance": 1.0,
+     "seeds": [
+      4,
+      5
+     ]
+    }
+   ]
+  },
+  "env": {
+   "pit_loss": 22.0,
+   "team": "McLaren"
+  },
+  "evaluation": {
+   "baselines": [
+    "rule-based",
+    "fixed one-stop"
+   ],
+   "episodes": 40,
+   "neutralisation_chance": 0.5,
+   "rain_chance": 0.25,
+   "seeds_from": 1000
+  },
+  "laps": 53,
+  "max_failed_episodes": 0,
+  "name": "scenario_coverage",
+  "processes": 7,
+  "question": "Does tuning RuleBased's four thresholds on a scenario-stratified training set (2 quiet, 2 VSC/SC, 2 wet races) beat the hand-set rule on held-out races, where tuning on the same number of randomly drawn races does not?",
+  "sensitivity": {
+   "pit_loss": 25.62
+  },
+  "statistics": {
+   "bootstrap_resamples": 2000,
+   "bootstrap_seed": 0,
+   "confidence": 0.95
+  }
+ },
+ "config_path": "research/configs/scenario_coverage.json",
+ "evaluation": {
+  "main": {
+   "episodes": {
+    "fixed one-stop": [
+     {
+      "penalty": 0.0,
+      "reward": -58.03691761179383,
+      "seed": 1000,
+      "stops": 1,
+      "stratum": "wet",
+      "time": 5455.374064029329,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.577183776032165,
+      "seed": 1001,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5130.164817695696,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.19417594936351,
+      "seed": 1002,
+      "stops": 1,
+      "stratum": "wet",
+      "time": 5470.156087117954,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.6236918513778,
+      "seed": 1003,
+      "stops": 1,
+      "stratum": "wet",
+      "time": 5510.529870019557,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.368973417913175,
+      "seed": 1004,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.593389124277,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.368973417913175,
+      "seed": 1005,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.593389124277,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.70940495235605,
+      "seed": 1006,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5142.593389124277,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.368973417913175,
+      "seed": 1007,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.593389124277,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.368973417913175,
+      "seed": 1008,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.593389124277,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.68356863054582,
+      "seed": 1009,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5140.164817695721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.1824386051665,
+      "seed": 1010,
+      "stops": 1,
+      "stratum": "wet",
+      "time": 5375.054453635944,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.66077187600698,
+      "seed": 1011,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5138.02196055284,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.64557403964764,
+      "seed": 1012,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5136.593389124241,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.368973417913175,
+      "seed": 1013,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.593389124277,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.73676105780252,
+      "seed": 1014,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5145.164817695721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.97935652068365,
+      "seed": 1015,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5167.968389124262,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.065129309635246,
+      "seed": 1016,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5176.030889124277,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.55921903053305,
+      "seed": 1017,
+      "stops": 1,
+      "stratum": "wet",
+      "time": 5410.471189137432,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.368973417913175,
+      "seed": 1018,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.593389124277,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.82186894141299,
+      "seed": 1019,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5153.164817695696,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -59.470039894405204,
+      "seed": 1020,
+      "stops": 1,
+      "stratum": "wet",
+      "time": 5590.085183310962,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.698766466904715,
+      "seed": 1021,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.593389124277,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.368973417913175,
+      "seed": 1022,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.593389124277,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.552867237857626,
+      "seed": 1023,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5127.879103409978,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.33641068864441,
+      "seed": 1024,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5201.530889124277,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.59188504730743,
+      "seed": 1025,
+      "stops": 1,
+      "stratum": "wet",
+      "time": 5507.540083154139,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.78985849858192,
+      "seed": 1026,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5150.155889124287,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.368973417913175,
+      "seed": 1027,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.593389124277,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.702090993608415,
+      "seed": 1028,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.905889124291,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.368973417913175,
+      "seed": 1029,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.593389124277,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.60302009784266,
+      "seed": 1030,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5132.593389124277,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.368973417913175,
+      "seed": 1031,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.593389124277,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.368973417913175,
+      "seed": 1032,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.593389124277,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.28255335604684,
+      "seed": 1033,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5196.468389124262,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.17672002998465,
+      "seed": 1034,
+      "stops": 1,
+      "stratum": "wet",
+      "time": 5374.516917046924,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.368973417913175,
+      "seed": 1035,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.593389124277,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.368973417913175,
+      "seed": 1036,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.593389124277,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.368973417913175,
+      "seed": 1037,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.593389124277,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.56502550694492,
+      "seed": 1038,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5129.02196055284,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.799072186874405,
+      "seed": 1039,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5151.02196055284,
+      "truncated": false
+     }
+    ],
+    "rule-based": [
+     {
+      "penalty": 0.0,
+      "reward": -57.53080666990944,
+      "seed": 1000,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5407.8004743299925,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.57447166698703,
+      "seed": 1001,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5129.909883940555,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.542203872804876,
+      "seed": 1002,
+      "stops": 3,
+      "stratum": "wet",
+      "time": 5408.871792512228,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.461598053344176,
+      "seed": 1003,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5495.293321661707,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1004,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1005,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.70669284331051,
+      "seed": 1006,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5142.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1007,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1008,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.68085652150043,
+      "seed": 1009,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5139.909883940555,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.046317663218346,
+      "seed": 1010,
+      "stops": 3,
+      "stratum": "wet",
+      "time": 5362.259310702228,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.65805976696152,
+      "seed": 1011,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5137.767026797667,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.64286193060247,
+      "seed": 1012,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5136.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1013,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.702966156276496,
+      "seed": 1014,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.988152964581,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.09233794092154,
+      "seed": 1015,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5178.588455369092,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.05244362047885,
+      "seed": 1016,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5174.838455369077,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.673819469409324,
+      "seed": 1017,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5421.2434404508795,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1018,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.75222325673059,
+      "seed": 1019,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5146.618238767619,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.84731062126986,
+      "seed": 1020,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5531.549663759454,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.696054357858955,
+      "seed": 1021,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.338455369077,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1022,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.550155128812364,
+      "seed": 1023,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5127.624169654824,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.340322061954076,
+      "seed": 1024,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5201.898551732603,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.61511059117748,
+      "seed": 1025,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5509.723245783469,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.7771728094258,
+      "seed": 1026,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5148.963455369111,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1027,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.68940530445212,
+      "seed": 1028,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5140.7134553691,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1029,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.60030798879711,
+      "seed": 1030,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5132.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1031,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1032,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.27000099095012,
+      "seed": 1033,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5195.288487609697,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.090037105790955,
+      "seed": 1034,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5366.368865842626,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1035,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1036,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1037,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.5623133978992,
+      "seed": 1038,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5128.767026797643,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.79636007782894,
+      "seed": 1039,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5150.767026797667,
+      "truncated": false
+     }
+    ],
+    "tuned random run 0": [
+     {
+      "penalty": 0.0,
+      "reward": -57.53080666990944,
+      "seed": 1000,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5407.8004743299925,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.57642600604712,
+      "seed": 1001,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5130.093588573045,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.90268114938721,
+      "seed": 1002,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5442.756059049146,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.461598053344176,
+      "seed": 1003,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5495.293321661707,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36821564792831,
+      "seed": 1004,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.522160001642,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36821564792831,
+      "seed": 1005,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.522160001642,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.70864718237119,
+      "seed": 1006,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5142.522160001642,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36821564792831,
+      "seed": 1007,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.522160001642,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36821564792831,
+      "seed": 1008,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.522160001642,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.68281086056085,
+      "seed": 1009,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5140.093588573076,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.02869018246769,
+      "seed": 1010,
+      "stops": 3,
+      "stratum": "wet",
+      "time": 5360.602356727785,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.660014106021926,
+      "seed": 1011,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5137.950731430187,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.64481626966315,
+      "seed": 1012,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5136.522160001642,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36821564792831,
+      "seed": 1013,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.522160001642,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.722325235094644,
+      "seed": 1014,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5143.807874287385,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.08232398384928,
+      "seed": 1015,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5177.64716000162,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.04641909545133,
+      "seed": 1016,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5174.27216000165,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.6552472430136,
+      "seed": 1017,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5419.497681951639,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36821564792831,
+      "seed": 1018,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.522160001642,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.82111117142813,
+      "seed": 1019,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5153.093588573062,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.84731062126986,
+      "seed": 1020,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5531.549663759454,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.69800869691986,
+      "seed": 1021,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.522160001642,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36821564792831,
+      "seed": 1022,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.522160001642,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.53539184787814,
+      "seed": 1023,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5126.2364457159465,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.340322061954076,
+      "seed": 1024,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5201.898551732603,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.58457103192693,
+      "seed": 1025,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5506.852577830756,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.769153568375465,
+      "seed": 1026,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5148.209660001621,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36821564792831,
+      "seed": 1027,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.522160001642,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.68338077942429,
+      "seed": 1028,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5140.147160001645,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36821564792831,
+      "seed": 1029,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.522160001642,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.602262327857794,
+      "seed": 1030,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5132.522160001642,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36821564792831,
+      "seed": 1031,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.522160001642,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36821564792831,
+      "seed": 1032,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.522160001642,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.40147854738948,
+      "seed": 1033,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5207.64716000162,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.090037105790955,
+      "seed": 1034,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5366.368865842626,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36821564792831,
+      "seed": 1035,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.522160001642,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36821564792831,
+      "seed": 1036,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.522160001642,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36821564792831,
+      "seed": 1037,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.522160001642,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.56426773695986,
+      "seed": 1038,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5128.950731430187,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.79831441688935,
+      "seed": 1039,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5150.950731430187,
+      "truncated": false
+     }
+    ],
+    "tuned random run 1": [
+     {
+      "penalty": 0.0,
+      "reward": -57.53080666990944,
+      "seed": 1000,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5407.8004743299925,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.57524403965446,
+      "seed": 1001,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5129.982485691147,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.542203872804876,
+      "seed": 1002,
+      "stops": 3,
+      "stratum": "wet",
+      "time": 5408.871792512228,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.461598053344176,
+      "seed": 1003,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5495.293321661707,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36703368153535,
+      "seed": 1004,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.411057119716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36703368153535,
+      "seed": 1005,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.411057119716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.707465215978225,
+      "seed": 1006,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5142.411057119716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36703368153535,
+      "seed": 1007,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.411057119716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36703368153535,
+      "seed": 1008,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.411057119716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.68162889416786,
+      "seed": 1009,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5139.982485691147,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.05689821731426,
+      "seed": 1010,
+      "stops": 3,
+      "stratum": "wet",
+      "time": 5363.253865250834,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.6588321396285,
+      "seed": 1011,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5137.839628548218,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.64363430327018,
+      "seed": 1012,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5136.411057119716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36703368153535,
+      "seed": 1013,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.411057119716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.734821321423986,
+      "seed": 1014,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5144.982485691095,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.099094461655255,
+      "seed": 1015,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5179.223557119676,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.05720542519129,
+      "seed": 1016,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5175.286057119741,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.68487377546663,
+      "seed": 1017,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5422.282526898651,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36703368153535,
+      "seed": 1018,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.411057119716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.81992920503471,
+      "seed": 1019,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5152.982485691095,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.84731062126986,
+      "seed": 1020,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5531.549663759454,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.69682673052666,
+      "seed": 1021,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.411057119695,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36703368153535,
+      "seed": 1022,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.411057119716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.55092750147975,
+      "seed": 1023,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5127.696771405413,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.33447095226638,
+      "seed": 1024,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5201.348557119697,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.6341876326228,
+      "seed": 1025,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5511.516456060681,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.78193461413761,
+      "seed": 1026,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5149.411057119716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36703368153535,
+      "seed": 1027,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.411057119716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.69416710916402,
+      "seed": 1028,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.161057119713,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36703368153535,
+      "seed": 1029,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.411057119716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.601080361464604,
+      "seed": 1030,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5132.411057119695,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36703368153535,
+      "seed": 1031,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.411057119716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36703368153535,
+      "seed": 1032,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.411057119716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.280052786799224,
+      "seed": 1033,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5196.233339759477,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.090037105790955,
+      "seed": 1034,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5366.368865842626,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36703368153535,
+      "seed": 1035,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.411057119716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36703368153535,
+      "seed": 1036,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.411057119716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36703368153535,
+      "seed": 1037,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.411057119716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.56308577056708,
+      "seed": 1038,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5128.839628548278,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.79713245049656,
+      "seed": 1039,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5150.839628548278,
+      "truncated": false
+     }
+    ],
+    "tuned random run 2": [
+     {
+      "penalty": 0.0,
+      "reward": -57.53080666990944,
+      "seed": 1000,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5407.8004743299925,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.57486555985253,
+      "seed": 1001,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5129.946909217066,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.75992935725644,
+      "seed": 1002,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5429.33762718836,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.461598053344176,
+      "seed": 1003,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5495.293321661707,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1004,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1005,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.707086736176066,
+      "seed": 1006,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5142.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1007,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1008,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.68125041436593,
+      "seed": 1009,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5139.946909217066,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.03691558141731,
+      "seed": 1010,
+      "stops": 3,
+      "stratum": "wet",
+      "time": 5361.375530596119,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.65845365982729,
+      "seed": 1011,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5137.804052074204,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.643255823468024,
+      "seed": 1012,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5136.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1013,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.702966156276496,
+      "seed": 1014,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.988152964581,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.086747685721015,
+      "seed": 1015,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5178.062980645637,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.048848081300825,
+      "seed": 1016,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5174.500480645656,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.66394454675511,
+      "seed": 1017,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5420.315214088267,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1018,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.781556134335446,
+      "seed": 1019,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5149.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.84731062126986,
+      "seed": 1020,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5531.549663759454,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.69644825072518,
+      "seed": 1021,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.375480645656,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1022,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.55054902167777,
+      "seed": 1023,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5127.6611949313265,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.340322061954076,
+      "seed": 1024,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5201.898551732603,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.59970857068029,
+      "seed": 1025,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5508.275481384331,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.77158255422484,
+      "seed": 1026,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5148.437980645615,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1027,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.68580976527338,
+      "seed": 1028,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5140.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1029,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.600701881662665,
+      "seed": 1030,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5132.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1031,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1032,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.40590224926075,
+      "seed": 1033,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5208.062980645593,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.090037105790955,
+      "seed": 1034,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5366.368865842626,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1035,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1036,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1037,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.562707290764976,
+      "seed": 1038,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5128.80405207418,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.79675397069471,
+      "seed": 1039,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5150.804052074204,
+      "truncated": false
+     }
+    ],
+    "tuned stratified run 0": [
+     {
+      "penalty": 0.0,
+      "reward": -57.53080666990944,
+      "seed": 1000,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5407.8004743299925,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.579149546548564,
+      "seed": 1001,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5130.349596866133,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.891412470230655,
+      "seed": 1002,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5441.69682188535,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.461598053344176,
+      "seed": 1003,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5495.293321661707,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.370939188429645,
+      "seed": 1004,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.778168294721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.370939188429645,
+      "seed": 1005,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.778168294721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.71137072287252,
+      "seed": 1006,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5142.778168294721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.370939188429645,
+      "seed": 1007,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.778168294721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.370939188429645,
+      "seed": 1008,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.778168294721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.68553440106196,
+      "seed": 1009,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5140.349596866133,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.021640349492564,
+      "seed": 1010,
+      "stops": 3,
+      "stratum": "wet",
+      "time": 5359.939684112649,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.662737646523524,
+      "seed": 1011,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5138.20673972329,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.64753981016449,
+      "seed": 1012,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5136.778168294721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.370939188429645,
+      "seed": 1013,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.778168294721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.738726828318654,
+      "seed": 1014,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5145.349596866133,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.07906337628469,
+      "seed": 1015,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5177.340668294742,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.04714791993067,
+      "seed": 1016,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5174.340668294742,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.64772686461344,
+      "seed": 1017,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5418.790778846442,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.370939188429645,
+      "seed": 1018,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.778168294721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.82383471192937,
+      "seed": 1019,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5153.349596866133,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.84731062126986,
+      "seed": 1020,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5531.549663759454,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.70073223742119,
+      "seed": 1021,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.778168294721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.370939188429645,
+      "seed": 1022,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.778168294721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.55483300837444,
+      "seed": 1023,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5128.0638825804535,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.33837645916084,
+      "seed": 1024,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5201.715668294717,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.57353706097502,
+      "seed": 1025,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5505.815402849189,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.769882392854896,
+      "seed": 1026,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5148.278168294721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.370939188429645,
+      "seed": 1027,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.778168294721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.68410960390361,
+      "seed": 1028,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5140.215668294733,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.370939188429645,
+      "seed": 1029,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.778168294721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.60498586835913,
+      "seed": 1030,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5132.778168294721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.370939188429645,
+      "seed": 1031,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.778168294721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.370939188429645,
+      "seed": 1032,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.778168294721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.400212655846964,
+      "seed": 1033,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5207.528168294737,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.090037105790955,
+      "seed": 1034,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5366.368865842626,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.370939188429645,
+      "seed": 1035,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.778168294721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.370939188429645,
+      "seed": 1036,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.778168294721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.370939188429645,
+      "seed": 1037,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.778168294721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.56699127746146,
+      "seed": 1038,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5129.20673972329,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.8010379573912,
+      "seed": 1039,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5151.206739723314,
+      "truncated": false
+     }
+    ],
+    "tuned stratified run 1": [
+     {
+      "penalty": 0.0,
+      "reward": -57.53080666990944,
+      "seed": 1000,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5407.8004743299925,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.57447166698703,
+      "seed": 1001,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5129.909883940555,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.542203872804876,
+      "seed": 1002,
+      "stops": 3,
+      "stratum": "wet",
+      "time": 5408.871792512228,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.461598053344176,
+      "seed": 1003,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5495.293321661707,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1004,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1005,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.70669284331051,
+      "seed": 1006,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5142.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1007,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1008,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.68085652150043,
+      "seed": 1009,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5139.909883940555,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.046317663218346,
+      "seed": 1010,
+      "stops": 3,
+      "stratum": "wet",
+      "time": 5362.259310702228,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.65805976696152,
+      "seed": 1011,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5137.767026797667,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.64286193060247,
+      "seed": 1012,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5136.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1013,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.702966156276496,
+      "seed": 1014,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.988152964581,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.09233794092154,
+      "seed": 1015,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5178.588455369092,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.05244362047885,
+      "seed": 1016,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5174.838455369077,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.673819469409324,
+      "seed": 1017,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5421.2434404508795,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1018,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.75222325673059,
+      "seed": 1019,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5146.618238767619,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.84731062126986,
+      "seed": 1020,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5531.549663759454,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.696054357858955,
+      "seed": 1021,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.338455369077,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1022,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.550155128812364,
+      "seed": 1023,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5127.624169654824,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.340322061954076,
+      "seed": 1024,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5201.898551732603,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.61511059117748,
+      "seed": 1025,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5509.723245783469,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.7771728094258,
+      "seed": 1026,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5148.963455369111,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1027,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.68940530445212,
+      "seed": 1028,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5140.7134553691,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1029,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.60030798879711,
+      "seed": 1030,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5132.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1031,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1032,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.27000099095012,
+      "seed": 1033,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5195.288487609697,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.090037105790955,
+      "seed": 1034,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5366.368865842626,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1035,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1036,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36626130886763,
+      "seed": 1037,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.338455369097,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.5623133978992,
+      "seed": 1038,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5128.767026797643,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.79636007782894,
+      "seed": 1039,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5150.767026797667,
+      "truncated": false
+     }
+    ],
+    "tuned stratified run 2": [
+     {
+      "penalty": 0.0,
+      "reward": -57.53080666990944,
+      "seed": 1000,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5407.8004743299925,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.57486555985253,
+      "seed": 1001,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5129.946909217066,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.75992935725644,
+      "seed": 1002,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5429.33762718836,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.461598053344176,
+      "seed": 1003,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5495.293321661707,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1004,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1005,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.707086736176066,
+      "seed": 1006,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5142.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1007,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1008,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.68125041436593,
+      "seed": 1009,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5139.946909217066,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.03691558141731,
+      "seed": 1010,
+      "stops": 3,
+      "stratum": "wet",
+      "time": 5361.375530596119,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.65845365982729,
+      "seed": 1011,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5137.804052074204,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.643255823468024,
+      "seed": 1012,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5136.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1013,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.702966156276496,
+      "seed": 1014,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.988152964581,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.086747685721015,
+      "seed": 1015,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5178.062980645637,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.048848081300825,
+      "seed": 1016,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5174.500480645656,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.66394454675511,
+      "seed": 1017,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5420.315214088267,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1018,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.781556134335446,
+      "seed": 1019,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5149.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.84731062126986,
+      "seed": 1020,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5531.549663759454,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.69644825072518,
+      "seed": 1021,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.375480645656,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1022,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.55054902167777,
+      "seed": 1023,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5127.6611949313265,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.340322061954076,
+      "seed": 1024,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5201.898551732603,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.59970857068029,
+      "seed": 1025,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5508.275481384331,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.77158255422484,
+      "seed": 1026,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5148.437980645615,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1027,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.68580976527338,
+      "seed": 1028,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5140.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1029,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.600701881662665,
+      "seed": 1030,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5132.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1031,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1032,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.40590224926075,
+      "seed": 1033,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5208.062980645593,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.090037105790955,
+      "seed": 1034,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5366.368865842626,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1035,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1036,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.36665520173318,
+      "seed": 1037,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5110.375480645613,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.562707290764976,
+      "seed": 1038,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5128.80405207418,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.79675397069471,
+      "seed": 1039,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5150.804052074204,
+      "truncated": false
+     }
+    ]
+   },
+   "pit_loss": 22.0,
+   "summaries": {
+    "fixed one-stop": {
+     "by_stratum": {
+      "neutralised": {
+       "mean_diff": 0.33566972988329424,
+       "n": 18
+      },
+      "quiet": {
+       "mean_diff": 0.25493375517999084,
+       "n": 14
+      },
+      "wet": {
+       "mean_diff": 23.82721655120713,
+       "n": 8
+      }
+     },
+     "failed": 0,
+     "race_time": {
+      "max": 5590.085183310962,
+      "mean": 5198.601836057154,
+      "min": 5110.593389124277,
+      "n": 40,
+      "std": 138.81261986787987
+     },
+     "vs_rule_based": {
+      "better": 4,
+      "ci": [
+       0.9560421201669442,
+       10.29714759056003
+      ],
+      "max": 61.284294605725336,
+      "mean": 5.005721503001905,
+      "min": -10.772251313447669,
+      "n": 40,
+      "std": 15.358353856518875,
+      "ties": 0,
+      "worse": 36
+     }
+    },
+    "rule-based": {
+     "failed": 0,
+     "race_time": {
+      "max": 5531.549663759454,
+      "mean": 5193.596114554152,
+      "min": 5110.338455369097,
+      "n": 40,
+      "std": 128.8713806276322
+     }
+    },
+    "tuned random run 0": {
+     "by_stratum": {
+      "neutralised": {
+       "mean_diff": 1.005093322458126,
+       "n": 18
+      },
+      "quiet": {
+       "mean_diff": 0.18370463254541392,
+       "n": 14
+      },
+      "wet": {
+       "mean_diff": 3.4513607638151598,
+       "n": 8
+      }
+     },
+     "failed": 0,
+     "race_time": {
+      "max": 5531.549663759454,
+      "mean": 5194.802975323412,
+      "min": 5110.522160001642,
+      "n": 40,
+      "std": 130.03201743308617
+     },
+     "vs_rule_based": {
+      "better": 8,
+      "ci": [
+       -0.09745808508744176,
+       3.451110243911194
+      ],
+      "max": 33.884266536917494,
+      "mean": 1.2068607692600835,
+      "min": -2.87066795271312,
+      "n": 40,
+      "std": 5.788345547559466,
+      "ties": 5,
+      "worse": 27
+     }
+    },
+    "tuned random run 1": {
+     "by_stratum": {
+      "neutralised": {
+       "mean_diff": 0.6920756497418855,
+       "n": 18
+      },
+      "quiet": {
+       "mean_diff": 0.07260175061946939,
+       "n": 14
+      },
+      "wet": {
+       "mean_diff": 0.47835640919868183,
+       "n": 8
+      }
+     },
+     "failed": 0,
+     "race_time": {
+      "max": 5531.549663759454,
+      "mean": 5194.028630491092,
+      "min": 5110.411057119716,
+      "n": 40,
+      "std": 128.9413962099952
+     },
+     "vs_rule_based": {
+      "better": 1,
+      "ci": [
+       0.16092547880989513,
+       0.8068124171624049
+      ],
+      "max": 6.364246923475548,
+      "mean": 0.43251593694039914,
+      "min": -0.5499946129057207,
+      "n": 40,
+      "std": 1.1277098265272723,
+      "ties": 5,
+      "worse": 34
+     }
+    },
+    "tuned random run 2": {
+     "by_stratum": {
+      "neutralised": {
+       "mean_diff": 0.7875049325162864,
+       "n": 18
+      },
+      "quiet": {
+       "mean_diff": 0.037025276516033045,
+       "n": 14
+      },
+      "wet": {
+       "mean_diff": 2.150757976034015,
+       "n": 8
+      }
+     },
+     "failed": 0,
+     "race_time": {
+      "max": 5531.549663759454,
+      "mean": 5194.393602215772,
+      "min": 5110.375480645613,
+      "n": 40,
+      "std": 129.6164533891678
+     },
+     "vs_rule_based": {
+      "better": 7,
+      "ci": [
+       -0.10259999530401273,
+       2.2114234489024738
+      ],
+      "max": 20.465834676131635,
+      "mean": 0.7974876616197435,
+      "min": -1.447764399137668,
+      "n": 40,
+      "std": 3.818824079265341,
+      "ties": 6,
+      "worse": 27
+     }
+    },
+    "tuned stratified run 0": {
+     "by_stratum": {
+      "neutralised": {
+       "mean_diff": 1.312115566999738,
+       "n": 18
+      },
+      "quiet": {
+       "mean_diff": 0.43971292562400777,
+       "n": 14
+      },
+      "wet": {
+       "mean_diff": 3.018112280603191,
+       "n": 8
+      }
+     },
+     "failed": 0,
+     "race_time": {
+      "max": 5531.549663759454,
+      "mean": 5194.9440885393915,
+      "min": 5110.778168294721,
+      "n": 40,
+      "std": 129.73514594206665
+     },
+     "vs_rule_based": {
+      "better": 8,
+      "ci": [
+       0.04258433006446012,
+       3.5411932016750596
+      ],
+      "max": 32.82502937312165,
+      "mean": 1.347973985238923,
+      "min": -3.90784293427987,
+      "n": 40,
+      "std": 5.6502436572271675,
+      "ties": 4,
+      "worse": 28
+     }
+    },
+    "tuned stratified run 1": {
+     "by_stratum": {
+      "neutralised": {
+       "mean_diff": 0.0,
+       "n": 18
+      },
+      "quiet": {
+       "mean_diff": 0.0,
+       "n": 14
+      },
+      "wet": {
+       "mean_diff": 0.0,
+       "n": 8
+      }
+     },
+     "failed": 0,
+     "race_time": {
+      "max": 5531.549663759454,
+      "mean": 5193.596114554152,
+      "min": 5110.338455369097,
+      "n": 40,
+      "std": 128.8713806276322
+     },
+     "vs_rule_based": {
+      "better": 0,
+      "ci": [
+       0.0,
+       0.0
+      ],
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0,
+      "n": 40,
+      "std": 0.0,
+      "ties": 40,
+      "worse": 0
+     }
+    },
+    "tuned stratified run 2": {
+     "by_stratum": {
+      "neutralised": {
+       "mean_diff": 0.7875049325162864,
+       "n": 18
+      },
+      "quiet": {
+       "mean_diff": 0.037025276516033045,
+       "n": 14
+      },
+      "wet": {
+       "mean_diff": 2.150757976034015,
+       "n": 8
+      }
+     },
+     "failed": 0,
+     "race_time": {
+      "max": 5531.549663759454,
+      "mean": 5194.393602215772,
+      "min": 5110.375480645613,
+      "n": 40,
+      "std": 129.6164533891678
+     },
+     "vs_rule_based": {
+      "better": 7,
+      "ci": [
+       -0.10259999530401273,
+       2.2114234489024738
+      ],
+      "max": 20.465834676131635,
+      "mean": 0.7974876616197435,
+      "min": -1.447764399137668,
+      "n": 40,
+      "std": 3.818824079265341,
+      "ties": 6,
+      "worse": 27
+     }
+    }
+   },
+   "verdict": {
+    "random": {
+     "ci_above_zero": 1,
+     "ci_below_zero": 0,
+     "helps": false,
+     "mean_of_run_means": 0.812288122606742,
+     "runs": 3,
+     "std_of_run_means": 0.38738452481884295
+    },
+    "stratified": {
+     "ci_above_zero": 1,
+     "ci_below_zero": 0,
+     "helps": false,
+     "mean_of_run_means": 0.7151538822862221,
+     "runs": 3,
+     "std_of_run_means": 0.6777481867439645
+    }
+   }
+  },
+  "sensitivity": {
+   "episodes": {
+    "fixed one-stop": [
+     {
+      "penalty": 0.0,
+      "reward": -58.07227602594008,
+      "seed": 1000,
+      "stops": 1,
+      "stratum": "wet",
+      "time": 5458.697696355375,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.6156950933661,
+      "seed": 1001,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5133.784817695704,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.22276316002768,
+      "seed": 1002,
+      "stops": 1,
+      "stratum": "wet",
+      "time": 5472.843237539406,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.657987053400106,
+      "seed": 1003,
+      "stops": 1,
+      "stratum": "wet",
+      "time": 5513.753562168141,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.407484735247266,
+      "seed": 1004,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.213389124299,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.407484735247266,
+      "seed": 1005,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.213389124299,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.74791626969015,
+      "seed": 1006,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5146.213389124299,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.407484735247266,
+      "seed": 1007,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.213389124299,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.407484735247266,
+      "seed": 1008,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.213389124299,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.7220799478795,
+      "seed": 1009,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5143.784817695704,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.22005542081565,
+      "seed": 1010,
+      "stops": 1,
+      "stratum": "wet",
+      "time": 5378.590371960145,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.69928319334085,
+      "seed": 1011,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.641960552841,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.684085356981974,
+      "seed": 1012,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5140.213389124287,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.407484735247266,
+      "seed": 1013,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.213389124299,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.7752723751362,
+      "seed": 1014,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5148.784817695704,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.017867838017565,
+      "seed": 1015,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5171.588389124267,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.1275772192342,
+      "seed": 1016,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5181.900889124238,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.5968316806595,
+      "seed": 1017,
+      "stops": 1,
+      "stratum": "wet",
+      "time": 5414.006715909404,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.407484735247266,
+      "seed": 1018,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.213389124299,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.86038025874692,
+      "seed": 1019,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5156.784817695704,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -59.50522905883576,
+      "seed": 1020,
+      "stops": 1,
+      "stratum": "wet",
+      "time": 5593.392906444251,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.73727778423868,
+      "seed": 1021,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5145.213389124287,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.407484735247266,
+      "seed": 1022,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.213389124299,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.59137855519174,
+      "seed": 1023,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5131.499103410002,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.3749220059782,
+      "seed": 1024,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5205.150889124271,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.65413110967569,
+      "seed": 1025,
+      "stops": 1,
+      "stratum": "wet",
+      "time": 5513.391109848962,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.85230640818116,
+      "seed": 1026,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5156.025889124274,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.407484735247266,
+      "seed": 1027,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.213389124299,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.76453890320749,
+      "seed": 1028,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5147.775889124264,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.407484735247266,
+      "seed": 1029,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.213389124299,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.64153141517675,
+      "seed": 1030,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5136.213389124299,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.407484735247266,
+      "seed": 1031,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.213389124299,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.407484735247266,
+      "seed": 1032,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.213389124299,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.32106467338028,
+      "seed": 1033,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5200.088389124223,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.21148471316062,
+      "seed": 1034,
+      "stops": 1,
+      "stratum": "wet",
+      "time": 5377.7847396458255,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.407484735247266,
+      "seed": 1035,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.213389124299,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.407484735247266,
+      "seed": 1036,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.213389124299,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.407484735247266,
+      "seed": 1037,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.213389124299,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.603536824278635,
+      "seed": 1038,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5132.641960552826,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.83758350420846,
+      "seed": 1039,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5154.641960552859,
+      "truncated": false
+     }
+    ],
+    "rule-based": [
+     {
+      "penalty": 0.0,
+      "reward": -57.66320663247372,
+      "seed": 1000,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5420.245851368848,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.61298298432055,
+      "seed": 1001,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5133.529883940524,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.644558248860264,
+      "seed": 1002,
+      "stops": 3,
+      "stratum": "wet",
+      "time": 5418.4929342173655,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.64099449667131,
+      "seed": 1003,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5512.156289999417,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1004,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1005,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.7452041606446,
+      "seed": 1006,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5145.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1007,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1008,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.71936783883395,
+      "seed": 1009,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5143.529883940524,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.155113359352065,
+      "seed": 1010,
+      "stops": 3,
+      "stratum": "wet",
+      "time": 5372.485925818764,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.69657108429518,
+      "seed": 1011,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.387026797649,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.681373247936556,
+      "seed": 1012,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5139.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1013,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.7414774736102,
+      "seed": 1014,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5145.608152964567,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.152791134498734,
+      "seed": 1015,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5184.2709553690875,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.1148915300783,
+      "seed": 1016,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5180.708455369085,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.85094559490499,
+      "seed": 1017,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5437.893002675299,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1018,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.77857630497684,
+      "seed": 1019,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5149.095381624729,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -59.05004008304753,
+      "seed": 1020,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5550.605897158929,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.73456567519326,
+      "seed": 1021,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5144.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1022,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.58866644614606,
+      "seed": 1023,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5131.2441696548085,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.38082809530985,
+      "seed": 1024,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5205.706051732584,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.87605514362187,
+      "seed": 1025,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5534.251601218831,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.83762600300279,
+      "seed": 1026,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5154.645955369088,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1027,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.75185321405146,
+      "seed": 1028,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5146.5834553690975,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1029,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.63881930613085,
+      "seed": 1030,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5135.958455369086,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1031,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1032,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.30851230828435,
+      "seed": 1033,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5198.908487609732,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.22965338701716,
+      "seed": 1034,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5379.492564875238,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1035,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1036,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1037,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.60082471523329,
+      "seed": 1038,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5132.3870267976645,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.83487139516318,
+      "seed": 1039,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5154.387026797704,
+      "truncated": false
+     }
+    ],
+    "tuned random run 0": [
+     {
+      "penalty": 0.0,
+      "reward": -57.66320663247372,
+      "seed": 1000,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5420.245851368848,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.61493732338162,
+      "seed": 1001,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5133.713588573106,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.08379544247923,
+      "seed": 1002,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5459.780502417559,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.64099449667131,
+      "seed": 1003,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5512.156289999417,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.406726965262514,
+      "seed": 1004,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.142160001676,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.406726965262514,
+      "seed": 1005,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.142160001676,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.7471584997054,
+      "seed": 1006,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5146.142160001676,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.406726965262514,
+      "seed": 1007,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.142160001676,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.406726965262514,
+      "seed": 1008,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.142160001676,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.72132217789502,
+      "seed": 1009,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5143.713588573106,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.137485878601346,
+      "seed": 1010,
+      "stops": 3,
+      "stratum": "wet",
+      "time": 5370.828971844316,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.6985254233561,
+      "seed": 1011,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.570731430218,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.68332758699736,
+      "seed": 1012,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5140.142160001676,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.406726965262514,
+      "seed": 1013,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.142160001676,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.75019806697688,
+      "seed": 1014,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5146.427874287359,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.14277717742648,
+      "seed": 1015,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5183.329660001617,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.10886700505096,
+      "seed": 1016,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5180.142160001676,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.83237336850934,
+      "seed": 1017,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5436.147244176065,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.406726965262514,
+      "seed": 1018,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.142160001676,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.859622488762035,
+      "seed": 1019,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5156.713588573068,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -59.05004008304753,
+      "seed": 1020,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5550.605897158929,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.73652001425406,
+      "seed": 1021,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5145.142160001676,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.406726965262514,
+      "seed": 1022,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.142160001676,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.56326467976053,
+      "seed": 1023,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5128.8564457159355,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.38082809530985,
+      "seed": 1024,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5205.706051732584,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.84691535599837,
+      "seed": 1025,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5531.512509479054,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.831601477975155,
+      "seed": 1026,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5154.079660001652,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.406726965262514,
+      "seed": 1027,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.142160001676,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.74582868902392,
+      "seed": 1028,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5146.017160001669,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.406726965262514,
+      "seed": 1029,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.142160001676,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.640773645192006,
+      "seed": 1030,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5136.142160001676,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.406726965262514,
+      "seed": 1031,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.142160001676,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.406726965262514,
+      "seed": 1032,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.142160001676,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.463926456989185,
+      "seed": 1033,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5213.517160001653,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.22965338701716,
+      "seed": 1034,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5379.492564875238,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.406726965262514,
+      "seed": 1035,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.142160001676,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.406726965262514,
+      "seed": 1036,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.142160001676,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.406726965262514,
+      "seed": 1037,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.142160001676,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.60277905429405,
+      "seed": 1038,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5132.570731430218,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.836825734223524,
+      "seed": 1039,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5154.570731430218,
+      "truncated": false
+     }
+    ],
+    "tuned random run 1": [
+     {
+      "penalty": 0.0,
+      "reward": -57.66320663247372,
+      "seed": 1000,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5420.245851368848,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.613755356988065,
+      "seed": 1001,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5133.6024856911245,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.644558248860264,
+      "seed": 1002,
+      "stops": 3,
+      "stratum": "wet",
+      "time": 5418.4929342173655,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.64099449667131,
+      "seed": 1003,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5512.156289999417,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405544998869104,
+      "seed": 1004,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.031057119708,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405544998869104,
+      "seed": 1005,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.031057119708,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.74597653331212,
+      "seed": 1006,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5146.031057119721,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405544998869104,
+      "seed": 1007,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.031057119708,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405544998869104,
+      "seed": 1008,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.031057119708,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.720140211501466,
+      "seed": 1009,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5143.6024856911245,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.1656939134479,
+      "seed": 1010,
+      "stops": 3,
+      "stratum": "wet",
+      "time": 5373.480480367363,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.69734345696287,
+      "seed": 1011,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.459628548267,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.68214562060395,
+      "seed": 1012,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5140.031057119708,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405544998869104,
+      "seed": 1013,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.031057119708,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.77333263875816,
+      "seed": 1014,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5148.6024856911245,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.161542371254804,
+      "seed": 1015,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5185.093557119693,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.11965333479027,
+      "seed": 1016,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5181.156057119704,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.86199990096242,
+      "seed": 1017,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5438.932089123081,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405544998869104,
+      "seed": 1018,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.031057119708,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.85844052236889,
+      "seed": 1019,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5156.6024856911245,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -59.05004008304753,
+      "seed": 1020,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5550.605897158929,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.735338047860296,
+      "seed": 1021,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5145.031057119674,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405544998869104,
+      "seed": 1022,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.031057119708,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.58943881881353,
+      "seed": 1023,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5131.316771405406,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.372982269599746,
+      "seed": 1024,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5204.968557119651,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.892879002427854,
+      "seed": 1025,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5535.833016062413,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.84438252373669,
+      "seed": 1026,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5155.28105711969,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405544998869104,
+      "seed": 1027,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.031057119708,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.75661501876333,
+      "seed": 1028,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5147.031057119708,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405544998869104,
+      "seed": 1029,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.031057119708,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.63959167879823,
+      "seed": 1030,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5136.031057119674,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405544998869104,
+      "seed": 1031,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.031057119708,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405544998869104,
+      "seed": 1032,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.031057119708,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.31856410413253,
+      "seed": 1033,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5199.853339759425,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.22965338701716,
+      "seed": 1034,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5379.492564875238,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405544998869104,
+      "seed": 1035,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.031057119708,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405544998869104,
+      "seed": 1036,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.031057119708,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405544998869104,
+      "seed": 1037,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.031057119708,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.60159708790081,
+      "seed": 1038,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5132.459628548267,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.83564376783071,
+      "seed": 1039,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5154.459628548306,
+      "truncated": false
+     }
+    ],
+    "tuned random run 2": [
+     {
+      "penalty": 0.0,
+      "reward": -57.66320663247372,
+      "seed": 1000,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5420.245851368848,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.61337687718663,
+      "seed": 1001,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5133.566909217089,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.906112286582925,
+      "seed": 1002,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5443.078580258712,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.64099449667131,
+      "seed": 1003,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5512.156289999417,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1004,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1005,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.74559805350985,
+      "seed": 1006,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5145.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1007,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1008,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.719761731699606,
+      "seed": 1009,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5143.566909217049,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.14571127755093,
+      "seed": 1010,
+      "stops": 3,
+      "stratum": "wet",
+      "time": 5371.602145712644,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.696964977161024,
+      "seed": 1011,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.424052074192,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.68176714080181,
+      "seed": 1012,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5139.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1013,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.7414774736102,
+      "seed": 1014,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5145.608152964567,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.14720087929804,
+      "seed": 1015,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5183.745480645616,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.111295990899904,
+      "seed": 1016,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5180.370480645629,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.84107067225108,
+      "seed": 1017,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5436.964776312714,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1018,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.80942896621789,
+      "seed": 1019,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5151.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -59.05004008304753,
+      "seed": 1020,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5550.605897158929,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.73495956805852,
+      "seed": 1021,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5144.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1022,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.58906033901171,
+      "seed": 1023,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5131.281194931335,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.38082809530985,
+      "seed": 1024,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5205.706051732584,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.86063086451626,
+      "seed": 1025,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5532.801744547393,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.83403046382417,
+      "seed": 1026,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5154.307980645612,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1027,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.74825767487264,
+      "seed": 1028,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5146.245480645602,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1029,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.63921319899678,
+      "seed": 1030,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5135.995480645637,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1031,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1032,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.46835015886048,
+      "seed": 1033,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5213.932980645628,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.22965338701716,
+      "seed": 1034,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5379.492564875238,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1035,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1036,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1037,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.60121860809896,
+      "seed": 1038,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5132.424052074192,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.83526528802844,
+      "seed": 1039,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5154.424052074192,
+      "truncated": false
+     }
+    ],
+    "tuned stratified run 0": [
+     {
+      "penalty": 0.0,
+      "reward": -57.66320663247372,
+      "seed": 1000,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5420.245851368848,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.61766086388278,
+      "seed": 1001,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5133.969596866168,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.073638749196135,
+      "seed": 1002,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5458.825790082842,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.64099449667131,
+      "seed": 1003,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5512.156289999417,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.409450505763445,
+      "seed": 1004,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.398168294716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.409450505763445,
+      "seed": 1005,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.398168294716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.74988204020632,
+      "seed": 1006,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5146.398168294716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.409450505763445,
+      "seed": 1007,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.398168294716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.409450505763445,
+      "seed": 1008,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.398168294716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.724045718396184,
+      "seed": 1009,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5143.969596866168,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.13043604562665,
+      "seed": 1010,
+      "stops": 3,
+      "stratum": "wet",
+      "time": 5370.1662992292195,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.701248963857104,
+      "seed": 1011,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.826739723265,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.68605112749829,
+      "seed": 1012,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5140.398168294716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.409450505763445,
+      "seed": 1013,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.398168294716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.77723814565312,
+      "seed": 1014,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5148.969596866191,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.141511285883965,
+      "seed": 1015,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5183.210668294733,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.10760111350814,
+      "seed": 1016,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5180.023168294762,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.824852990109655,
+      "seed": 1017,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5435.440341070911,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.409450505763445,
+      "seed": 1018,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.398168294716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.862346029263605,
+      "seed": 1019,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5156.969596866168,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -59.05004008304753,
+      "seed": 1020,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5550.605897158929,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.739243554754985,
+      "seed": 1021,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5145.398168294716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.409450505763445,
+      "seed": 1022,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.398168294716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.59334432570832,
+      "seed": 1023,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5131.683882580457,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.376887776494826,
+      "seed": 1024,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5205.33566829473,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.834151951637914,
+      "seed": 1025,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5530.312770623477,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.83033558643237,
+      "seed": 1026,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5153.960668294742,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.409450505763445,
+      "seed": 1027,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.398168294716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.746557513502964,
+      "seed": 1028,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5146.085668294732,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.409450505763445,
+      "seed": 1029,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.398168294716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.64349718569294,
+      "seed": 1030,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5136.398168294716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.409450505763445,
+      "seed": 1031,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.398168294716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.409450505763445,
+      "seed": 1032,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.398168294716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.46066584942417,
+      "seed": 1033,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5213.210668294733,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.22965338701716,
+      "seed": 1034,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5379.492564875238,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.409450505763445,
+      "seed": 1035,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.398168294716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.409450505763445,
+      "seed": 1036,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.398168294716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.409450505763445,
+      "seed": 1037,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5114.398168294716,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.60550259479504,
+      "seed": 1038,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5132.826739723265,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.839549274724945,
+      "seed": 1039,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5154.826739723304,
+      "truncated": false
+     }
+    ],
+    "tuned stratified run 1": [
+     {
+      "penalty": 0.0,
+      "reward": -57.66320663247372,
+      "seed": 1000,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5420.245851368848,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.61298298432055,
+      "seed": 1001,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5133.529883940524,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.644558248860264,
+      "seed": 1002,
+      "stops": 3,
+      "stratum": "wet",
+      "time": 5418.4929342173655,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.64099449667131,
+      "seed": 1003,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5512.156289999417,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1004,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1005,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.7452041606446,
+      "seed": 1006,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5145.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1007,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1008,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.71936783883395,
+      "seed": 1009,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5143.529883940524,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.155113359352065,
+      "seed": 1010,
+      "stops": 3,
+      "stratum": "wet",
+      "time": 5372.485925818764,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.69657108429518,
+      "seed": 1011,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.387026797649,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.681373247936556,
+      "seed": 1012,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5139.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1013,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.7414774736102,
+      "seed": 1014,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5145.608152964567,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.152791134498734,
+      "seed": 1015,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5184.2709553690875,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.1148915300783,
+      "seed": 1016,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5180.708455369085,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.85094559490499,
+      "seed": 1017,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5437.893002675299,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1018,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.77857630497684,
+      "seed": 1019,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5149.095381624729,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -59.05004008304753,
+      "seed": 1020,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5550.605897158929,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.73456567519326,
+      "seed": 1021,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5144.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1022,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.58866644614606,
+      "seed": 1023,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5131.2441696548085,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.38082809530985,
+      "seed": 1024,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5205.706051732584,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.87605514362187,
+      "seed": 1025,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5534.251601218831,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.83762600300279,
+      "seed": 1026,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5154.645955369088,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1027,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.75185321405146,
+      "seed": 1028,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5146.5834553690975,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1029,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.63881930613085,
+      "seed": 1030,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5135.958455369086,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1031,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1032,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.30851230828435,
+      "seed": 1033,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5198.908487609732,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.22965338701716,
+      "seed": 1034,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5379.492564875238,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1035,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1036,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.40477262620171,
+      "seed": 1037,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.958455369118,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.60082471523329,
+      "seed": 1038,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5132.3870267976645,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.83487139516318,
+      "seed": 1039,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5154.387026797704,
+      "truncated": false
+     }
+    ],
+    "tuned stratified run 2": [
+     {
+      "penalty": 0.0,
+      "reward": -57.66320663247372,
+      "seed": 1000,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5420.245851368848,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.61337687718663,
+      "seed": 1001,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5133.566909217089,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.906112286582925,
+      "seed": 1002,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5443.078580258712,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.64099449667131,
+      "seed": 1003,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5512.156289999417,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1004,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1005,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.74559805350985,
+      "seed": 1006,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5145.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1007,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1008,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.719761731699606,
+      "seed": 1009,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5143.566909217049,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.14571127755093,
+      "seed": 1010,
+      "stops": 3,
+      "stratum": "wet",
+      "time": 5371.602145712644,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.696964977161024,
+      "seed": 1011,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5141.424052074192,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.68176714080181,
+      "seed": 1012,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5139.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1013,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.7414774736102,
+      "seed": 1014,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5145.608152964567,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.14720087929804,
+      "seed": 1015,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5183.745480645616,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.111295990899904,
+      "seed": 1016,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5180.370480645629,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.84107067225108,
+      "seed": 1017,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5436.964776312714,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1018,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.80942896621789,
+      "seed": 1019,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5151.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -59.05004008304753,
+      "seed": 1020,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5550.605897158929,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.73495956805852,
+      "seed": 1021,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5144.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1022,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.58906033901171,
+      "seed": 1023,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5131.281194931335,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.38082809530985,
+      "seed": 1024,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5205.706051732584,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -58.86063086451626,
+      "seed": 1025,
+      "stops": 5,
+      "stratum": "wet",
+      "time": 5532.801744547393,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.83403046382417,
+      "seed": 1026,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5154.307980645612,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1027,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.74825767487264,
+      "seed": 1028,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5146.245480645602,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1029,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.63921319899678,
+      "seed": 1030,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5135.995480645637,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1031,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1032,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -55.46835015886048,
+      "seed": 1033,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5213.932980645628,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -57.22965338701716,
+      "seed": 1034,
+      "stops": 4,
+      "stratum": "wet",
+      "time": 5379.492564875238,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1035,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1036,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.405166519066974,
+      "seed": 1037,
+      "stops": 1,
+      "stratum": "quiet",
+      "time": 5113.995480645607,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.60121860809896,
+      "seed": 1038,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5132.424052074192,
+      "truncated": false
+     },
+     {
+      "penalty": 0.0,
+      "reward": -54.83526528802844,
+      "seed": 1039,
+      "stops": 1,
+      "stratum": "neutralised",
+      "time": 5154.424052074192,
+      "truncated": false
+     }
+    ]
+   },
+   "pit_loss": 25.62,
+   "summaries": {
+    "fixed one-stop": {
+     "by_stratum": {
+      "neutralised": {
+       "mean_diff": 0.28457846004271736,
+       "n": 18
+      },
+      "quiet": {
+       "mean_diff": 0.25493375518090033,
+       "n": 14
+      },
+      "wet": {
+       "mean_diff": 12.104534067352233,
+       "n": 8
+      }
+     },
+     "failed": 0,
+     "race_time": {
+      "max": 5593.392906444251,
+      "mean": 5202.3848983676435,
+      "min": 5114.213389124299,
+      "n": 40,
+      "std": 138.7649816674301
+     },
+     "vs_rule_based": {
+      "better": 5,
+      "ci": [
+       -0.9176516844295293,
+       7.233430486037878
+      ],
+      "max": 54.35030332204042,
+      "mean": 2.6381939348029846,
+      "min": -23.88628676589451,
+      "n": 40,
+      "std": 13.654478574396634,
+      "ties": 0,
+      "worse": 35
+     }
+    },
+    "rule-based": {
+     "failed": 0,
+     "race_time": {
+      "max": 5550.605897158929,
+      "mean": 5199.7467044328405,
+      "min": 5113.958455369118,
+      "n": 40,
+      "std": 133.75570290680784
+     }
+    },
+    "tuned random run 0": {
+     "by_stratum": {
+      "neutralised": {
+       "mean_diff": 1.0928909415276091,
+       "n": 18
+      },
+      "quiet": {
+       "mean_diff": 0.18370463255723735,
+       "n": 14
+      },
+      "wet": {
+       "mean_diff": 4.393220498341748,
+       "n": 8
+      }
+     },
+     "failed": 0,
+     "race_time": {
+      "max": 5550.605897158929,
+      "mean": 5201.181446077591,
+      "min": 5114.142160001676,
+      "n": 40,
+      "std": 135.25335305113535
+     },
+     "vs_rule_based": {
+      "better": 8,
+      "ci": [
+       -0.12738484342262382,
+       4.199189602525917
+      ],
+      "max": 41.287568200193164,
+      "mean": 1.4347416447508068,
+      "min": -2.7390917397769954,
+      "n": 40,
+      "std": 7.009275156022736,
+      "ties": 5,
+      "worse": 27
+     }
+    },
+    "tuned random run 1": {
+     "by_stratum": {
+      "neutralised": {
+       "mean_diff": 0.7659843798947905,
+       "n": 18
+      },
+      "quiet": {
+       "mean_diff": 0.07260175058945606,
+       "n": 14
+      },
+      "wet": {
+       "mean_diff": 0.4518819799953917,
+       "n": 8
+      }
+     },
+     "failed": 0,
+     "race_time": {
+      "max": 5550.605897158929,
+      "mean": 5200.2071844124985,
+      "min": 5114.031057119708,
+      "n": 40,
+      "std": 133.79957680160373
+     },
+     "vs_rule_based": {
+      "better": 1,
+      "ci": [
+       0.1599339689772023,
+       0.881638573246164
+      ],
+      "max": 7.507104066395186,
+      "mean": 0.4604799796580437,
+      "min": -0.7374946129320961,
+      "n": 40,
+      "std": 1.2855663277170097,
+      "ties": 5,
+      "worse": 34
+     }
+    },
+    "tuned random run 2": {
+     "by_stratum": {
+      "neutralised": {
+       "mean_diff": 0.9308581071149497,
+       "n": 18
+      },
+      "quiet": {
+       "mean_diff": 0.037025276488748204,
+       "n": 14
+      },
+      "wet": {
+       "mean_diff": 2.6654728626505175,
+       "n": 8
+      }
+     },
+     "failed": 0,
+     "race_time": {
+      "max": 5550.605897158929,
+      "mean": 5200.711644000344,
+      "min": 5113.995480645607,
+      "n": 40,
+      "std": 134.66206155577908
+     },
+     "vs_rule_based": {
+      "better": 7,
+      "ci": [
+       -0.09197141210313475,
+       2.6729677999677053
+      ],
+      "max": 24.58564604134608,
+      "mean": 0.9649395675028927,
+      "min": -1.4498566714373737,
+      "n": 40,
+      "std": 4.5453613519889675,
+      "ties": 6,
+      "worse": 27
+     }
+    },
+    "tuned stratified run 0": {
+     "by_stratum": {
+      "neutralised": {
+       "mean_diff": 1.4797742971665886,
+       "n": 18
+      },
+      "quiet": {
+       "mean_diff": 0.4397129255976324,
+       "n": 14
+      },
+      "wet": {
+       "mean_diff": 3.952717134523823,
+       "n": 8
+      }
+     },
+     "failed": 0,
+     "race_time": {
+      "max": 5550.605897158929,
+      "mean": 5201.35704581743,
+      "min": 5114.398168294716,
+      "n": 40,
+      "std": 134.9276449237674
+     },
+     "vs_rule_based": {
+      "better": 8,
+      "ci": [
+       0.04432734224124033,
+       4.28820494949232
+      ],
+      "max": 40.33285586547663,
+      "mean": 1.6103413845889007,
+      "min": -3.9388305953534655,
+      "n": 40,
+      "std": 6.85914249249997,
+      "ties": 4,
+      "worse": 28
+     }
+    },
+    "tuned stratified run 1": {
+     "by_stratum": {
+      "neutralised": {
+       "mean_diff": 0.0,
+       "n": 18
+      },
+      "quiet": {
+       "mean_diff": 0.0,
+       "n": 14
+      },
+      "wet": {
+       "mean_diff": 0.0,
+       "n": 8
+      }
+     },
+     "failed": 0,
+     "race_time": {
+      "max": 5550.605897158929,
+      "mean": 5199.7467044328405,
+      "min": 5113.958455369118,
+      "n": 40,
+      "std": 133.75570290680784
+     },
+     "vs_rule_based": {
+      "better": 0,
+      "ci": [
+       0.0,
+       0.0
+      ],
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0,
+      "n": 40,
+      "std": 0.0,
+      "ties": 40,
+      "worse": 0
+     }
+    },
+    "tuned stratified run 2": {
+     "by_stratum": {
+      "neutralised": {
+       "mean_diff": 0.9308581071149497,
+       "n": 18
+      },
+      "quiet": {
+       "mean_diff": 0.037025276488748204,
+       "n": 14
+      },
+      "wet": {
+       "mean_diff": 2.6654728626505175,
+       "n": 8
+      }
+     },
+     "failed": 0,
+     "race_time": {
+      "max": 5550.605897158929,
+      "mean": 5200.711644000344,
+      "min": 5113.995480645607,
+      "n": 40,
+      "std": 134.66206155577908
+     },
+     "vs_rule_based": {
+      "better": 7,
+      "ci": [
+       -0.09197141210313475,
+       2.6729677999677053
+      ],
+      "max": 24.58564604134608,
+      "mean": 0.9649395675028927,
+      "min": -1.4498566714373737,
+      "n": 40,
+      "std": 4.5453613519889675,
+      "ties": 6,
+      "worse": 27
+     }
+    }
+   },
+   "verdict": {
+    "random": {
+     "ci_above_zero": 1,
+     "ci_below_zero": 0,
+     "helps": false,
+     "mean_of_run_means": 0.953387063970581,
+     "runs": 3,
+     "std_of_run_means": 0.48723356131400564
+    },
+    "stratified": {
+     "ci_above_zero": 1,
+     "ci_below_zero": 0,
+     "helps": false,
+     "mean_of_run_means": 0.8584269840305978,
+     "runs": 3,
+     "std_of_run_means": 0.8104372533135317
+    }
+   }
+  }
+ },
+ "failed_episodes": 0,
+ "python": "3.12.3",
+ "revision": {
+  "code_digest": "b6ab74716c2104dcdbb490dc057313fc863e3a5c020e699cfed11157bcd2d10e",
+  "dirty": true,
+  "git_head": "3ef534b10fc9a5bfbacd68d230a0f90697b65c52"
+ },
+ "status": "complete",
+ "training": [
+  {
+   "design": "random",
+   "errors": [],
+   "failed_candidates": 0,
+   "failed_episodes": 0,
+   "hand_set_train_score": -55.68277780987262,
+   "history": [
+    {
+     "best_score": -55.637217689893596,
+     "elite_mean": -55.65113468677685,
+     "iteration": 1
+    },
+    {
+     "best_score": -55.637217689893596,
+     "elite_mean": -55.64567693585197,
+     "iteration": 2
+    },
+    {
+     "best_score": -55.637217689893596,
+     "elite_mean": -55.637217689893596,
+     "iteration": 3
+    },
+    {
+     "best_score": -55.637217689893596,
+     "elite_mean": -55.637217689893596,
+     "iteration": 4
+    }
+   ],
+   "policy": {
+    "final_call": 0.902,
+    "neutral_from": 0.316,
+    "neutral_to": 0.598,
+    "wear_limit": 0.671
+   },
+   "run": 0,
+   "train_score": -55.637217689893596
+  },
+  {
+   "design": "random",
+   "errors": [],
+   "failed_candidates": 0,
+   "failed_episodes": 0,
+   "hand_set_train_score": -54.669118414374125,
+   "history": [
+    {
+     "best_score": -54.667167632141506,
+     "elite_mean": -54.667167632141506,
+     "iteration": 1
+    },
+    {
+     "best_score": -54.667167632141506,
+     "elite_mean": -54.667167632141506,
+     "iteration": 2
+    },
+    {
+     "best_score": -54.66489544309329,
+     "elite_mean": -54.6660315376174,
+     "iteration": 3
+    },
+    {
+     "best_score": -54.66489544309329,
+     "elite_mean": -54.66489544309329,
+     "iteration": 4
+    }
+   ],
+   "policy": {
+    "final_call": 0.774,
+    "neutral_from": 0.671,
+    "neutral_to": 0.913,
+    "wear_limit": 0.768
+   },
+   "run": 1,
+   "train_score": -54.66489544309329
+  },
+  {
+   "design": "random",
+   "errors": [],
+   "failed_candidates": 0,
+   "failed_episodes": 0,
+   "hand_set_train_score": -55.0979229984891,
+   "history": [
+    {
+     "best_score": -55.0979229984891,
+     "elite_mean": -55.100870902886285,
+     "iteration": 1
+    },
+    {
+     "best_score": -55.0972538845328,
+     "elite_mean": -55.09758844151095,
+     "iteration": 2
+    },
+    {
+     "best_score": -55.0972538845328,
+     "elite_mean": -55.0972538845328,
+     "iteration": 3
+    },
+    {
+     "best_score": -55.0972538845328,
+     "elite_mean": -55.0972538845328,
+     "iteration": 4
+    }
+   ],
+   "policy": {
+    "final_call": 0.874,
+    "neutral_from": 0.324,
+    "neutral_to": 0.722,
+    "wear_limit": 0.704
+   },
+   "run": 2,
+   "train_score": -55.0972538845328
+  },
+  {
+   "design": "stratified",
+   "errors": [],
+   "failed_candidates": 0,
+   "failed_episodes": 0,
+   "hand_set_train_score": -55.580839127494805,
+   "history": [
+    {
+     "best_score": -55.57496728154873,
+     "elite_mean": -55.575353491015804,
+     "iteration": 1
+    },
+    {
+     "best_score": -55.57496728154873,
+     "elite_mean": -55.57496728154873,
+     "iteration": 2
+    },
+    {
+     "best_score": -55.57496728154873,
+     "elite_mean": -55.57496728154873,
+     "iteration": 3
+    },
+    {
+     "best_score": -55.57496728154873,
+     "elite_mean": -55.57496728154873,
+     "iteration": 4
+    }
+   ],
+   "policy": {
+    "final_call": 0.764,
+    "neutral_from": 0.601,
+    "neutral_to": 1.0,
+    "wear_limit": 0.646
+   },
+   "run": 0,
+   "train_score": -55.57496728154873
+  },
+  {
+   "design": "stratified",
+   "errors": [],
+   "failed_candidates": 0,
+   "failed_episodes": 0,
+   "hand_set_train_score": -55.49842730451532,
+   "history": [
+    {
+     "best_score": -55.49842730451532,
+     "elite_mean": -55.50536921123832,
+     "iteration": 1
+    },
+    {
+     "best_score": -55.49842730451532,
+     "elite_mean": -55.50265816672164,
+     "iteration": 2
+    },
+    {
+     "best_score": -55.49842730451532,
+     "elite_mean": -55.50054273561848,
+     "iteration": 3
+    },
+    {
+     "best_score": -55.49842730451532,
+     "elite_mean": -55.49842730451532,
+     "iteration": 4
+    }
+   ],
+   "policy": {
+    "final_call": 0.85,
+    "neutral_from": 0.3,
+    "neutral_to": 0.85,
+    "wear_limit": 0.75
+   },
+   "run": 1,
+   "train_score": -55.49842730451532
+  },
+  {
+   "design": "stratified",
+   "errors": [],
+   "failed_candidates": 0,
+   "failed_episodes": 0,
+   "hand_set_train_score": -55.19420366766333,
+   "history": [
+    {
+     "best_score": -55.19420366766333,
+     "elite_mean": -55.19703387869839,
+     "iteration": 1
+    },
+    {
+     "best_score": -55.19335083083469,
+     "elite_mean": -55.19377724924901,
+     "iteration": 2
+    },
+    {
+     "best_score": -55.19335083083469,
+     "elite_mean": -55.19335083083469,
+     "iteration": 3
+    },
+    {
+     "best_score": -55.19335083083469,
+     "elite_mean": -55.19335083083469,
+     "iteration": 4
+    }
+   ],
+   "policy": {
+    "final_call": 0.874,
+    "neutral_from": 0.324,
+    "neutral_to": 0.722,
+    "wear_limit": 0.704
+   },
+   "run": 2,
+   "train_score": -55.19335083083469
+  }
+ ],
+ "wall_time_s": 1833.0
+}

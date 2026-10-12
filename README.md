@@ -4,7 +4,7 @@ A Python simulation of Formula 1 cars racing around a track. It grows one small,
 
 The physics, car parameters, track geometry, tyre and fuel values, traffic rules, weather model and race-control rules are **simplified placeholders**. V6 measures how far the model is from real F1 timing data. At Monza the baseline lap is about 19 % too slow; see [Validation](#validation-v6).
 
-## Current version: V7 — reinforcement-learning environment
+## Current version: V8 — strategy research (end of the planned roadmap)
 
 - **V0:** a simplified physics model computes a flying-lap speed profile and lap time for one car.
 - **V1:** several cars start from a grid and race a set number of laps, with positions, laps and gaps.
@@ -28,7 +28,8 @@ The physics, car parameters, track geometry, tyre and fuel values, traffic rules
   - a repeatable validation workflow;
   - a 2-parameter calibration on 2024, evaluated on held-out 2025, with the baseline kept;
   - a generated report.
-- **V7 (new):** an RL environment, `rl.env.StrategyEnv`, with Gymnasium-style `reset()` and `step()`. The agent makes the pit calls for one car at Monza while random, seeded VSC/SC and rain scenarios play out. V7 also adds four baseline policies, a seeded evaluation harness, and a small policy-search experiment.
+- **V7:** an RL environment, `rl.env.StrategyEnv`, with Gymnasium-style `reset()` and `step()`. The agent makes the pit calls for one car at Monza while random, seeded VSC/SC and rain scenarios play out. V7 also adds four baseline policies, a seeded evaluation harness, and a small policy-search experiment.
+- **V8 (new):** one controlled research experiment: does the training-race mix decide whether tuning beats the hand-set rule? It has a configuration file, parallel failure-tolerant runs, bootstrap statistics, and stored results tied to the code. Result: **negative**, neither training design beat the hand-set rule.
 
 ## Requirements and setup
 
@@ -450,6 +451,43 @@ Result of the committed experiment ([report](rl/reports/experiment_report.md)), 
 
 The tuning did not improve on the hand-set policy because its 3 training races had no VSC or Safety Car, so it overfitted.
 
+## Strategy research (V8)
+
+The experiment code is in `research/`. It reuses the V7 environment unchanged and needs no extra dependencies.
+
+**Question:** does the mix of race types used for tuning decide whether tuning the rule-based policy's 4 thresholds beats the hand-set rule?
+
+**Design:**
+- two training designs with the same budget of 6 races per candidate:
+  - random draws;
+  - stratified: 2 quiet, 2 with a VSC or Safety Car, 2 wet;
+- 3 cross-entropy runs per design;
+- 40 held-out races;
+- paired bootstrap 95 % confidence intervals;
+- a decision rule fixed in the config before running;
+- a sensitivity re-run at V6's measured pit loss of 25.62 s.
+
+```bash
+python3 -m research.scenario_coverage                            # about 30 min on 7 processes -> research/results/scenario_coverage.{json,md}
+python3 -m research.scenario_coverage research/configs/smoke.json   # about 20 s pipeline check (not a result)
+python3 test_research.py                                         # includes "stored results match this code (digest), config and report"
+```
+
+**Findings** (this simulator only; see the [report](research/results/scenario_coverage.md) and [V8 IMPLEMENTATION.md](docs/versions/v8/IMPLEMENTATION.md)):
+
+| Comparison with the hand-set rule, 40 held-out races | Mean difference | 95 % CI | Verdict |
+|---|---|---|---|
+| Tuned, random training (3 runs) | +0.43 to +1.21 s | none below 0 | does not help |
+| Tuned, stratified training (3 runs) | 0.00 to +1.35 s | none below 0 | does not help |
+| Fixed one-stop | +5.0 s | [+1.0, +10.3] | worse |
+
+1. **Negative result.** Stratified training did not make tuning beat the hand-set rule, and neither did random training.
+2. **The tuning overfits.** One run gained 4.3 s per race on its training races and lost 1.2 s per race on held-out races.
+3. **Thresholds matter little here.** No tuned variant moved the mean by more than 1.4 s per race. Reacting to weather and flags matters: the rule beats a fixed one-stop, mostly in wet races.
+4. **A V6 error can change a conclusion.** At the measured pit loss of 25.62 s, the rule's advantage over the fixed one-stop is no longer statistically clear (+2.6 s, CI [−0.9, +7.2]).
+
+Hierarchical and multi-agent RL were not attempted. The simulator exposes no lower-level decisions, and with a time-based reward rival agents barely affect each other (IMPLEMENTATION.md §3).
+
 Options: `StrategyEnv(laps, team, start_compound, pit_loss, neutralisation_chance, rain_chance, opponents=0-3, two_compound_rule, max_steps, dt, seed)`. `pit_loss=25.62` uses the Monza pit loss measured in V6.
 
 V6 found the model's lap times, pit loss and tyre and fuel effects to be off or unvalidated, so anything learned here describes **this simulator**, not real F1. See [V7 IMPLEMENTATION.md](docs/versions/v7/IMPLEMENTATION.md).
@@ -465,6 +503,7 @@ python3 test_weather.py         # V4 weather state, wetting/drying, wet grip, ty
 python3 test_race_control.py    # V5 flags and transitions, VSC/SC, retirements, penalties, event order + V4/V5 regression
 python3 test_validation.py      # V6 reference data, metrics, calibration reproducibility, report up to date
 python3 test_rl.py              # V7 environment API, masks, rewards, termination/truncation, seeding, baselines
+python3 test_research.py        # V8 config validation, runner, statistics, CEM, decision rule, failures, stored results
 ```
 
 Each file prints `ok` when all its tests pass. An assertion error means a test failed. The tests are plain `test_*` functions using only the standard library.
@@ -486,6 +525,7 @@ Each file prints `ok` when all its tests pass. An assertion error means a test f
 | `race_control.py` | `Flag`, `RaceControlRules`, `Incident`, `Penalty`, `ControlEvent`, `RaceControl` |
 | `race.py` | `RaceCar`, `OvertakeEvent`, `WeatherEvent`, `PitEvent`, `LapProfile`, `Race` |
 | `main.py` | Entry point |
+| `research/` | V8: `config`, `runner`, `stats`, `cem`, `scenario_coverage`, `configs/`, `results/` |
 | `rl/` | V7: `env` (StrategyEnv), `policies` (baselines), `evaluate`, `experiment`, `reports/` |
 | `validation/` | V6 tooling: `fetch_reference`, `reference` (load/convert), `metrics`, `model`, `calibrate`, `evaluate`, `config/`, `reports/` |
 | `data/reference/` | V6 reference data (raw API responses) and its provenance |
@@ -503,7 +543,8 @@ Each file prints `ok` when all its tests pass. An assertion error means a test f
 | V5 | [Implementation](docs/versions/v5/IMPLEMENTATION.md) · [Code flow](docs/versions/v5/CODE_FLOW.md) · [Changelog](docs/versions/v5/CHANGELOG.md) |
 | V6 | [Implementation](docs/versions/v6/IMPLEMENTATION.md) · [Code flow](docs/versions/v6/CODE_FLOW.md) · [Changelog](docs/versions/v6/CHANGELOG.md) |
 | V7 | [Implementation](docs/versions/v7/IMPLEMENTATION.md) · [Code flow](docs/versions/v7/CODE_FLOW.md) · [Changelog](docs/versions/v7/CHANGELOG.md) |
+| V8 | [Implementation](docs/versions/v8/IMPLEMENTATION.md) · [Code flow](docs/versions/v8/CODE_FLOW.md) · [Changelog](docs/versions/v8/CHANGELOG.md) |
 
 ## Roadmap
 
-V8 advanced strategy research.
+All planned versions (V0–V8) are implemented. That does not mean the simulator is complete or validated. V6 found the baseline about 19 % slow at Monza, and most tyre, fuel, traffic, weather and race-control parameters are unvalidated placeholders.

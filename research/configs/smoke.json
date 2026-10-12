@@ -1,0 +1,20 @@
+{
+  "name": "smoke",
+  "question": "Smoke test of the experiment pipeline on 4-lap races (not a research result).",
+  "decision_rule": "Same rule as scenario_coverage, applied to a tiny budget; meaningless as evidence.",
+  "laps": 4,
+  "env": {"team": "McLaren", "pit_loss": 22.0},
+  "designs": {
+    "random": [{"neutralisation_chance": 0.5, "rain_chance": 0.25, "seeds": [0, 1]}],
+    "stratified": [{"neutralisation_chance": 0.0, "rain_chance": 0.0, "seeds": [0]},
+                   {"neutralisation_chance": 1.0, "rain_chance": 0.0, "seeds": [1]}]
+  },
+  "cem": {"runs": [0, 1], "iterations": 1, "population": 2, "elites": 1,
+          "bounds": {"wear_limit": [0.3, 1.0], "neutral_from": [0.0, 0.8], "neutral_to": [0.2, 1.0], "final_call": [0.6, 0.98]}},
+  "evaluation": {"neutralisation_chance": 0.5, "rain_chance": 0.25, "seeds_from": 1000, "episodes": 3,
+                 "baselines": ["rule-based", "fixed one-stop"]},
+  "sensitivity": {"pit_loss": 25.62},
+  "statistics": {"bootstrap_resamples": 200, "bootstrap_seed": 0, "confidence": 0.95},
+  "processes": 1,
+  "max_failed_episodes": 0
+}

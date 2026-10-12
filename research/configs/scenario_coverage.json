@@ -1,0 +1,28 @@
+{
+  "name": "scenario_coverage",
+  "question": "Does tuning RuleBased's four thresholds on a scenario-stratified training set (2 quiet, 2 VSC/SC, 2 wet races) beat the hand-set rule on held-out races, where tuning on the same number of randomly drawn races does not?",
+  "decision_rule": "A design helps if, in at least 2 of its 3 CEM runs, the 95% bootstrap CI of the paired race-time difference (tuned minus hand-set rule-based, 40 held-out races) lies entirely below 0. Fixed before running.",
+  "laps": 53,
+  "env": {"team": "McLaren", "pit_loss": 22.0},
+  "designs": {
+    "random": [{"neutralisation_chance": 0.5, "rain_chance": 0.25, "seeds": [0, 1, 2, 3, 4, 5]}],
+    "stratified": [
+      {"neutralisation_chance": 0.0, "rain_chance": 0.0, "seeds": [0, 1]},
+      {"neutralisation_chance": 1.0, "rain_chance": 0.0, "seeds": [2, 3]},
+      {"neutralisation_chance": 0.0, "rain_chance": 1.0, "seeds": [4, 5]}
+    ]
+  },
+  "cem": {
+    "runs": [0, 1, 2],
+    "iterations": 4,
+    "population": 8,
+    "elites": 2,
+    "bounds": {"wear_limit": [0.3, 1.0], "neutral_from": [0.0, 0.8], "neutral_to": [0.2, 1.0], "final_call": [0.6, 0.98]}
+  },
+  "evaluation": {"neutralisation_chance": 0.5, "rain_chance": 0.25, "seeds_from": 1000, "episodes": 40,
+                 "baselines": ["rule-based", "fixed one-stop"]},
+  "sensitivity": {"pit_loss": 25.62},
+  "statistics": {"bootstrap_resamples": 2000, "bootstrap_seed": 0, "confidence": 0.95},
+  "processes": 7,
+  "max_failed_episodes": 0
+}
