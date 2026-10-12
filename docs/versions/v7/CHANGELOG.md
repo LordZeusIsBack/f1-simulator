@@ -6,7 +6,7 @@
 |---|---|
 | Branch | `ai-agent-branch` (never `main`) |
 | Parent (V6) | `446db72` "docs(v6): record version commit hash in changelog" (V6 code is in `dd5f4e1`) |
-| V7 version commit | `PENDING` |
+| V7 version commit | `66207f42fd4e6f173d8f8d077d0eb83ec1490ce0` (`66207f4`) |
 | Commit message | `feat(v7): add reinforcement-learning environment` |
 
 As in earlier versions, the hash is recorded by a follow-up commit, `docs(v7): record version commit hash in changelog`, which changes only this table.
