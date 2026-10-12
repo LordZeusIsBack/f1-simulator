@@ -1,5 +1,7 @@
 # V8: Advanced strategy research (implementation)
 
+> **Later change (V9):** the experiment was re-run on the corrected environment, with a hidden random pit loss in the main run and 22 s in the sensitivity run. The verdict is unchanged; the fixed one-stop result changed. See [V9 IMPLEMENTATION.md §8.2](../v9/IMPLEMENTATION.md#8-results). The results below are V8's, at commit `1874202`.
+
 ## 1. Objective and scope
 
 V8 runs **one controlled research experiment** on top of the V7 environment. It changes neither the simulator (V0–V5), nor the validation tooling (V6), nor the RL environment (V7). New code lives in `research/`.

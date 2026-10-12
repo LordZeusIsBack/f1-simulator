@@ -11,7 +11,7 @@ Real, public Formula 1 timing data for the **2024 and 2025 Italian Grands Prix (
   - Credit "Jolpica-F1 / Ergast".
   - Anything derived from this data must use the same licence.
 
-  This licence applies to the files in this folder, not to the project's code.
+  This licence applies to the files in this folder, not to the project's code: see [LICENSE.md](LICENSE.md) and the repository's [NOTICE](../../NOTICE).
 - **Disclaimer from the source:** the data comes with no guarantee of correctness or availability. The API is rate-limited (4 requests/s burst, 500/hour). The fetch script waits 0.5 s between requests.
 
 ## Files (`raw/`, stored byte-for-byte as downloaded)

@@ -3,13 +3,15 @@ import json
 from dataclasses import fields
 from pathlib import Path
 
+from cars import CARS
 from rl.policies import RuleBased
+from tracks import CIRCUITS
 
 BASELINES = ("rule-based", "fixed one-stop", "stay out")
 SEED_STRIDE = 7919  # CEM run r trains on seed + r * SEED_STRIDE, so every run sees different races
 _TOP = {"name", "question", "decision_rule", "laps", "env", "designs", "cem", "evaluation", "sensitivity",
         "statistics", "processes", "max_failed_episodes"}
-_ENV = {"team", "pit_loss"}
+_ENV = {"team", "track"}  # pit loss is hidden and random per race (rl.env, V9); sensitivity may fix it
 _SOURCE = {"neutralisation_chance", "rain_chance", "seeds"}
 _CEM = {"runs", "iterations", "population", "elites", "bounds"}
 _EVALUATION = {"neutralisation_chance", "rain_chance", "seeds_from", "episodes", "baselines"}
@@ -58,9 +60,8 @@ def validate(config: dict) -> None:
             raise ConfigError(f"{text} must be a non-empty string")
     _int(config["laps"], "laps", 2)
     _keys(config["env"], _ENV, "env")
-    pit_loss = config["env"]["pit_loss"]
-    if isinstance(pit_loss, bool) or not isinstance(pit_loss, (int, float)) or pit_loss < 0:
-        raise ConfigError("env.pit_loss must be a number >= 0")
+    if config["env"]["team"] not in CARS or config["env"]["track"] not in CIRCUITS:
+        raise ConfigError(f"env needs a team from {sorted(CARS)} and a track from {sorted(CIRCUITS)}")
 
     designs = config["designs"]
     if not isinstance(designs, dict) or len(designs) < 2:

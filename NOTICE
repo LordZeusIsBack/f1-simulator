@@ -1,0 +1,26 @@
+F1 Strategist
+Copyright the F1 Strategist contributors.
+
+The source code is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This repository also contains or uses third-party material under other terms:
+
+1. Jolpica-F1 / Ergast Formula 1 timing data
+   Files: data/reference/raw/*.json, and the values reproduced from them in
+   validation/reports/validation_report.md and validation/config/calibrated.json.
+   Source: the Jolpica-F1 project and its contributors, https://github.com/jolpica/jolpica-f1
+   (an Ergast-compatible successor to the Ergast Developer API).
+   Licence: Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International,
+   https://creativecommons.org/licenses/by-nc-sa/4.0/ (see data/reference/LICENSE.md).
+   Not covered by the Apache License.
+
+2. F1-Encyclopedia by LordZeusIsBack
+   https://github.com/LordZeusIsBack/F1-Encyclopedia
+   tracks.py takes circuit lengths, race distances, corner types and estimated corner
+   speeds from it, together with the lateral-g classification that turns speeds into
+   radii. Lines marked "# E" in tracks.py use its numbers. No text is copied.
+
+3. Wikipedia (https://en.wikipedia.org)
+   Individual facts that the encyclopedia lacked or had wrong (some circuit lengths,
+   lap records and banking angles). Each one is noted on its circuit in tracks.py.
+   No text is copied.

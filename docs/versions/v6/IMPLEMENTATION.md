@@ -1,5 +1,7 @@
 # V6: Calibration and validation (implementation)
 
+> **Later change (V9):** V9 rebuilt Monza to its official length with new segment types and recalibrated: `tyre_grip` is now 2.4811 and held-out 2025 qualifying MAE is 0.56 s. The numbers below are V6's, for the V0 layout (now `tracks.MonzaV0`). See [V9 IMPLEMENTATION.md §4.1 and §5](../v9/IMPLEMENTATION.md).
+
 ## 1. Objective and scope
 
 V6 adds no simulator features. It measures how far the existing model is from real Formula 1 data, in a repeatable way:

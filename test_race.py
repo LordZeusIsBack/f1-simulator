@@ -7,7 +7,7 @@ from physics import TYRE_GRIP
 from race import GRID_SPACING, LapProfile, Race, RaceCar
 from simulation import simulate_lap
 from test_simulation import Stadium
-from tracks import Monza
+from tracks import MonzaV0
 from tyres import Compound
 
 assert_raises = TestCase().assertRaises
@@ -31,7 +31,7 @@ def test_v1_monza_race_results_unchanged():
           5: 4982.460995837225, 6: 4982.598205595793, 7: 5051.314782433612, 8: 5051.46414224547}
     entries = [(team, car) for team, car in CARS.items() for _ in range(2)]
     grid = [RaceCar(number, team, car) for number, (team, car) in enumerate(entries, start=1)]
-    v1_race(Monza(), 53, grid).run(0.5)
+    v1_race(MonzaV0(), 53, grid).run(0.5)
     for car in grid:
         assert math.isclose(car.finish_time, v1[car.number], abs_tol=1e-6)
 

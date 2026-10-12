@@ -66,8 +66,9 @@ def main(settings: dict = SETTINGS) -> str:
         "",
         "## Settings",
         "",
-        f"- Environment: `StrategyEnv(laps={settings['laps']})`, defaults otherwise (McLaren, medium start, pit_loss 22 s, "
-        "VSC/SC chance 0.5, rain chance 0.25, alone, two-compound rule on).",
+        f"- Environment: `StrategyEnv(laps={settings['laps']})`, defaults otherwise (Monza, McLaren, medium start, V6 "
+        "calibrated grip; hidden per-race pit loss 25.62 ± 2.5 s, fuel burn ± 8 % and tyre wear ± 25 %; VSC/SC chance "
+        "0.5, rain chance 0.25; alone, two-compound rule on).",
         f"- Training seeds: {list(settings['train_seeds'])}. Evaluation seeds: {settings['eval_seeds'][0]}-{settings['eval_seeds'][-1]} "
         f"({n} episodes, disjoint from training).",
         f"- Cross-entropy method: {settings['iterations']} iterations x population {settings['population']}, "

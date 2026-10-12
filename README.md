@@ -2,9 +2,9 @@
 
 A Python simulation of Formula 1 cars racing around a track. It grows one small, documented version at a time, towards a platform for race-strategy and reinforcement-learning experiments.
 
-The physics, car parameters, track geometry, tyre and fuel values, traffic rules, weather model and race-control rules are **simplified placeholders**. V6 measures how far the model is from real F1 timing data. At Monza the baseline lap is about 19 % too slow; see [Validation](#validation-v6).
+The physics, car parameters, tyre and fuel values, traffic rules, weather model and race-control rules are **simplified**, and most of their numbers are assumptions. Since V9 the simulator has 28 real circuits, built approximately from public estimates. V6/V9 measure how far the model is from real F1 timing data. At Monza the calibrated model is within about 0.6 s of real qualifying laps; see [Validation](#validation-v6-recalibrated-in-v9).
 
-## Current version: V8 — strategy research (end of the planned roadmap)
+## Current version: V9 — real circuits, richer track geometry, randomised race conditions
 
 - **V0:** a simplified physics model computes a flying-lap speed profile and lap time for one car.
 - **V1:** several cars start from a grid and race a set number of laps, with positions, laps and gaps.
@@ -29,7 +29,16 @@ The physics, car parameters, track geometry, tyre and fuel values, traffic rules
   - a 2-parameter calibration on 2024, evaluated on held-out 2025, with the baseline kept;
   - a generated report.
 - **V7:** an RL environment, `rl.env.StrategyEnv`, with Gymnasium-style `reset()` and `step()`. The agent makes the pit calls for one car at Monza while random, seeded VSC/SC and rain scenarios play out. V7 also adds four baseline policies, a seeded evaluation harness, and a small policy-search experiment.
-- **V8 (new):** one controlled research experiment: does the training-race mix decide whether tuning beats the hand-set rule? It has a configuration file, parallel failure-tolerant runs, bootstrap statistics, and stored results tied to the code. Result: **negative**, neither training design beat the hand-set rule.
+- **V8:** one controlled research experiment: does the training-race mix decide whether tuning beats the hand-set rule? It has a configuration file, parallel failure-tolerant runs, bootstrap statistics, and stored results tied to the code. Result: **negative**, neither training design beat the hand-set rule.
+- **V9 (new):** requested after the roadmap. V9 adds:
+  - 28 approximate real circuits (Sepang, Baku, Singapore, Buddh, COTA, Imola, Monaco, Spa and more) built from [F1-Encyclopedia](https://github.com/LordZeusIsBack/F1-Encyclopedia);
+  - new segment types: hairpins, chicanes, esses, spirals (decreasing or increasing radius) and banked corners;
+  - recalibration on the new Monza;
+  - an RL environment that uses the calibrated grip and any circuit, with hidden, random pit loss, fuel burn and tyre wear in every race;
+  - re-runs of the V7 and V8 experiments;
+  - licence notices and credits.
+
+  See [Tracks](#tracks-v9) and [Licence and credits](#licence-and-credits).
 
 ## Requirements and setup
 
@@ -45,10 +54,13 @@ git checkout ai-agent-branch
 ## Running
 
 ```bash
-python3 main.py        # V0 lap table, then a 53-lap Monza race with traffic (about 19 s)
-python3 main.py 10     # a 10-lap race (at least 2 laps, so the one-stop plan fits)
-uv run main.py         # the same through uv
+python3 main.py            # lap table, then a Monza Grand Prix (53 laps) with traffic
+python3 main.py 10         # a 10-lap race (at least 2 laps, so the one-stop plan fits)
+python3 main.py 20 Baku    # 20 laps of another circuit; an unknown name lists them all
+uv run main.py             # the same through uv
 ```
+
+`main.py` uses the simulator's own defaults (grip 1.8, pit loss 22 s), not the calibrated values. Fuel per lap scales with the circuit's length.
 
 Each team runs one car on **"no stop (M)"** and one on **"1 stop (M-H)"**, so the two plans meet on identical cars. The program prints:
 
@@ -56,6 +68,41 @@ Each team runs one car on **"no stop (M)"** and one on **"1 stop (M-H)"**, so th
 - the final classification, with a strategy column;
 - the pit-stop log: lap, time, old tyres and their wear, new tyres, fuel added, stop duration;
 - the overtake log: each pass with the speed advantage, the margin needed and DRS, plus how often cars were held up.
+
+## Tracks (V9)
+
+`tracks.CIRCUITS` maps a name to a circuit class. There are 28:
+
+- **Europe:** Monza, Spa, Silverstone, Monaco, Barcelona, Zandvoort, RedBullRing, Hungaroring, Imola, Madrid, Istanbul;
+- **Americas:** COTA, Miami, Mexico, Interlagos, LasVegas, Montreal;
+- **Asia, Pacific and Middle East:** Bahrain, Jeddah, Suzuka, Shanghai, Singapore, Lusail, YasMarina, Baku, AlbertPark, Sepang, Buddh.
+
+```python
+from tracks import CIRCUITS
+track = CIRCUITS["Sepang"]()
+track.length, track.laps, track.lap_record     # 5543.0 m, 56, 94.08 s
+```
+
+Segment types (`abstract_classes.py`). Each one is cut into 1 m points for the lap model:
+
+| Type | Built from | Lap-model effect |
+|---|---|---|
+| `Straight` | length, gradient | No corner limit |
+| `Corner` | length, radius, gradient, `banking` | Constant radius |
+| `Hairpin` | radius, angle (default 180°) | Length = radius × angle |
+| `Spiral` | length, entry radius, exit radius | Curvature changes linearly along it (decreasing- or increasing-radius corners such as Parabolica or Shanghai T1) |
+| `Chicane`, `Esses` | two or more parts | Each part is driven in turn; one segment for race control and traffic |
+| any segment | `banking` in degrees | Positive banking raises the cornering limit (Zandvoort T3/T14, Madrid's La Monumental); negative = off-camber |
+
+How a circuit is built (details in [V9 IMPLEMENTATION.md](docs/versions/v9/IMPLEMENTATION.md)):
+
+1. **Corner radius:** from the corner's estimated minimum speed and the encyclopedia's lateral-g table for that speed.
+2. **Straights:** scaled so the lap equals the official length.
+3. **Elevation:** given in metres, and sums to zero over a lap.
+
+These are **approximations**, not surveyed geometry. The corner speeds are estimates, mostly from the encyclopedia and otherwise by the V9 author. As a sanity check, the calibrated model's laps are compared with each circuit's race lap record in the [validation report](validation/reports/validation_report.md). The median is −5.9 %, with a range from −17.6 % (Zandvoort, where banking is counted twice) to +2.3 %.
+
+`tracks.MonzaV0` is the original layout, kept so the V0–V5 regression tests still guard the simulator itself.
 
 ## Configuration (V2)
 
@@ -138,7 +185,7 @@ Flags only escalate (GREEN → YELLOW → VSC → SAFETY_CAR). Each one ends by 
 
 ## Strategy comparison example
 
-The same car (McLaren) runs alone over 53 laps of Monza with default settings, once per plan. The run is deterministic and takes about 9 s:
+The examples below use `MonzaV0`, the layout of their version, so their printed numbers stay valid. The same car (McLaren) runs alone over 53 laps of Monza with default settings, once per plan. The run is deterministic and takes about 9 s:
 
 ```bash
 python3 - <<'EOF'
@@ -146,7 +193,7 @@ from abstract_classes import TyreCompound as T
 from cars import CARS
 from race import FUEL_PER_LAP, Race, RaceCar
 from strategy import PitStop, Strategy
-from tracks import Monza
+from tracks import MonzaV0
 
 laps, fuel = 53, 53 * FUEL_PER_LAP
 plans = [
@@ -158,7 +205,7 @@ plans = [
 ]
 for plan in plans:
     car = RaceCar(1, "McLaren", CARS["McLaren"], plan)
-    race = Race(Monza(), laps, [car])
+    race = Race(MonzaV0(), laps, [car])
     race.run()
     print(f"{plan.name:<16} {car.finish_time:9.3f} s  stops {len(race.pit_events)}")
 EOF
@@ -185,7 +232,7 @@ python3 - <<'EOF'
 from cars import CARS
 from drivers import Driver
 from race import Race, RaceCar
-from tracks import Monza
+from tracks import MonzaV0
 
 for traffic in ("on", "off"):
     grid = [
@@ -193,7 +240,7 @@ for traffic in ("on", "off"):
         RaceCar(2, "McLaren", CARS["McLaren"], driver=Driver("Rookie", racecraft=0.1)),
         RaceCar(3, "McLaren", CARS["McLaren"], driver=Driver("Veteran", racecraft=0.9)),
     ]
-    race = Race(Monza(), 6, grid, **({} if traffic == "on" else {"traffic": None}))
+    race = Race(MonzaV0(), 6, grid, **({} if traffic == "on" else {"traffic": None}))
     race.run(0.1)
     print(f"traffic {traffic}:", ", ".join(f"#{c.number} {c.driver.name} {c.finish_time:.3f} s" for c in race.standings()))
     for e in race.overtakes:
@@ -235,7 +282,7 @@ from abstract_classes import TyreCompound as T
 from cars import CARS
 from race import FUEL_PER_LAP, Race, RaceCar
 from strategy import Strategy
-from tracks import Monza
+from tracks import MonzaV0
 from weather import Weather, WeatherPoint
 
 laps = 20
@@ -251,7 +298,7 @@ grid = [
     RaceCar(1, "McLaren", CARS["McLaren"], Strategy(T.MEDIUM, laps * FUEL_PER_LAP, name="stays out")),
     RaceCar(2, "McLaren", CARS["McLaren"], Strategy(T.MEDIUM, laps * FUEL_PER_LAP, name="reacts", react_to_weather=True)),
 ]
-race = Race(Monza(), laps, grid, weather=Weather(timeline))
+race = Race(MonzaV0(), laps, grid, weather=Weather(timeline))
 race.run(0.1)
 for e in race.weather_events:
     c = e.conditions
@@ -303,7 +350,7 @@ from cars import CARS
 from race import FUEL_PER_LAP, Race, RaceCar
 from race_control import Flag, Incident, Penalty, RaceControl
 from strategy import PitStop, Strategy
-from tracks import Monza
+from tracks import MonzaV0
 
 laps = 12
 one_stop = Strategy(T.MEDIUM, laps * FUEL_PER_LAP, (PitStop(6, T.HARD),), name="1 stop")
@@ -321,7 +368,7 @@ control = RaceControl(
         Penalty(200, 5, "drive-through", reason="unsafe release"),
     ],
 )
-race = Race(Monza(), laps, grid, race_control=control)
+race = Race(MonzaV0(), laps, grid, race_control=control)
 race.run(0.1)
 for e in control.events:
     print(f"{e.time:7.1f} s  {e.kind:<16} {e.flag.name:<10} {e.detail}")
@@ -360,7 +407,7 @@ What happens:
 - **The 5 s penalty costs #2 a place.** #2 crosses the line 0.7 s ahead of #5 but is classified behind it.
 - **The retired #3 is classified last.**
 
-## Validation (V6)
+## Validation (V6, recalibrated in V9)
 
 The comparison uses the real public timing data from the 2024 and 2025 Italian GPs in `data/reference/raw/`.
 
@@ -371,21 +418,23 @@ Everything below runs offline from the committed files:
 
 ```bash
 python3 -m validation.calibrate    # fit tyre_grip and pit_loss on 2024 only -> validation/config/calibrated.json
-python3 -m validation.evaluate     # baseline and calibrated vs 2024 and 2025 -> validation/reports/validation_report.md (about 8 s)
-python3 test_validation.py         # data checks, metrics, reproducibility, "report is up to date" (about 12 s)
+python3 -m validation.evaluate     # baseline and calibrated vs 2024 and 2025, plus every circuit vs its lap record
+                                   # -> validation/reports/validation_report.md (about 16 s)
+python3 test_validation.py         # data checks, metrics, reproducibility, "report is up to date" (about 25 s)
 python3 -m validation.fetch_reference   # optional: re-download the raw data (needs internet)
 ```
 
-Headline results (full numbers in [the report](validation/reports/validation_report.md)):
+Headline results with V9's Monza (full numbers in [the report](validation/reports/validation_report.md); V6's numbers for the old layout are in the [V6 docs](docs/versions/v6/IMPLEMENTATION.md)):
 
 | Check | Baseline | Calibrated, on held-out 2025 |
 |---|---|---|
-| Monza length | +107 m (+1.85 %) | not calibrated |
-| Qualifying lap (4 teams), MAE | 15.8 s (≈ 20 % slow) | 0.52 s, but the fastest team is wrong |
+| Monza length | built to the official 5793 m (V6 layout: +107 m) | — |
+| Qualifying lap (4 teams), MAE | 8.9 s (≈ 11 % slow) | 0.56 s, but the fastest team is wrong |
 | Pit loss against the measured median | −3.4 s | +0.26 s |
-| Winner's race time | +16.8 % | −2.1 % |
+| Winner's race time | +8.2 % | −1.9 % |
+| 28 circuits vs their race lap records (sanity check) | — | median −5.9 %, range −17.6 % to +2.3 % |
 
-The calibrated grip (2.94) is an **effective** value that absorbs other model errors; it is not a real tyre property. The simulator defaults are unchanged. See [V6 IMPLEMENTATION.md](docs/versions/v6/IMPLEMENTATION.md) for what can and cannot be validated.
+The calibrated grip (2.48 since V9, 2.94 in V6) is an **effective** value that absorbs other model errors; it is not a real tyre property. The simulator defaults are unchanged; the RL environment uses the calibrated values since V9. See [V6 IMPLEMENTATION.md](docs/versions/v6/IMPLEMENTATION.md) for what can and cannot be validated.
 
 ## RL environment (V7)
 
@@ -415,13 +464,23 @@ The calibrated grip (2.94) is an **effective** value that absorbs other model er
 
   It contains no scenario forecast and nothing about rivals' plans.
 - **Reward:** −(time since the last call) ÷ one reference lap. The final step includes penalties, so the episode return is −(race time + penalties) ÷ reference lap. `terminated` means the car finished; `truncated` means `max_steps` was reached.
-- **Randomness:** `reset(seed=s)` reproduces the whole episode: VSC or SC 50 % of the time, rain 25 %, and the air temperature.
+- **Randomness:** `reset(seed=s)` reproduces the whole episode. Each race draws conditions the agent is never told and only sees the effects of:
+
+  | Hidden condition | Distribution | Basis |
+  |---|---|---|
+  | VSC or Safety Car | the circuit's chance (0.5; street circuits 0.7; Singapore 0.9), at a random time, 60–150 s | V7; F1-Encyclopedia: SC very likely on street circuits |
+  | Rain shower | the circuit's chance (0.25; wet-prone 0.4; desert 0.05), random start, length and intensity | V7; F1-Encyclopedia's wet-prone list |
+  | Pit loss | circuit value ± 2.5 s (Monza 25.62 s measured in V6; others 22.5 s) | V6; F1-Encyclopedia: ~20–25 s |
+  | Fuel burn | 0.32 kg/km × lap length × (1 ± 8 %); the car is fuelled for the worst case | assumption under the 110 kg limit |
+  | Tyre wear | every compound's wear × circuit factor (1.2 at the encyclopedia's tyre-demanding circuits, 0.8 at Albert Park) × (1 ± 25 %) | assumption |
+
+  `info["scenario"]` records them for analysis. Policies are given only the observation and the action mask.
 
 ```python
 from rl.env import StrategyEnv
 from rl.policies import RuleBased
 
-env = StrategyEnv(laps=10)          # defaults: McLaren, mediums, pit_loss 22 s, alone, two-compound rule on
+env = StrategyEnv(laps=10)          # defaults: Monza, McLaren, mediums, calibrated grip, hidden conditions, alone
 policy = RuleBased()
 observation, info = env.reset(seed=16)
 done, total = False, 0.0
@@ -429,10 +488,10 @@ while not done:
     observation, reward, terminated, truncated, info = env.step(policy(observation, info["action_mask"]))
     total += reward
     done = terminated or truncated
-print(info["total_time"], info["pit_stops"], total)   # 1011.9075462319665 [(4, 'hard')] -10.765...
+print(info["total_time"], info["pit_stops"], total)   # 855.9481806437545 [(4, 'hard')] -10.864...
 ```
 
-To evaluate and experiment (each 53-lap episode takes about 2 s):
+To evaluate and experiment (each 53-lap episode takes about 1.5–2 s):
 
 ```bash
 python3 -m rl.evaluate --laps 53 --seeds 20   # 4 baselines on seeds 100-119: mean, std, min, max, paired difference to rule-based
@@ -440,16 +499,14 @@ python3 -m rl.experiment                      # tune RuleBased's 4 thresholds wi
                                               # then evaluate on seeds 100-119 -> rl/reports/experiment_report.md (about 7 min)
 ```
 
-Result of the committed experiment ([report](rl/reports/experiment_report.md)), on 20 held-out races:
+Result of the committed experiment, re-run in V9 with the calibrated grip and hidden conditions ([report](rl/reports/experiment_report.md)), on 20 held-out races:
 
-| Policy | Compared with the hand-set rule-based policy |
-|---|---|
-| fixed one-stop | +4.2 ± 12.7 s, worse on 18 of 20 |
-| stay out | +40.7 s |
-| random | +164 s |
-| CEM-tuned version of the rule-based policy | +0.2 ± 5.4 s, no improvement |
-
-The tuning did not improve on the hand-set policy because its 3 training races had no VSC or Safety Car, so it overfitted.
+| Policy | Compared with the hand-set rule-based policy | V7 (old settings) |
+|---|---|---|
+| fixed one-stop | +2.8 ± 12.2 s, worse on 12 of 20 | +4.2 ± 12.7 s |
+| stay out | +27.2 s | +40.7 s |
+| random | +149.5 s | +164 s |
+| CEM-tuned version of the rule-based policy | identical: no better thresholds found on the 3 training races | +0.2 ± 5.4 s |
 
 ## Strategy research (V8)
 
@@ -465,30 +522,30 @@ The experiment code is in `research/`. It reuses the V7 environment unchanged an
 - 40 held-out races;
 - paired bootstrap 95 % confidence intervals;
 - a decision rule fixed in the config before running;
-- a sensitivity re-run at V6's measured pit loss of 25.62 s.
+- a sensitivity re-run with a fixed pit loss (V8: 25.62 s; since V9, the old placeholder of 22 s, because the main run now draws a hidden pit loss around 25.62 s).
 
 ```bash
-python3 -m research.scenario_coverage                            # about 30 min on 7 processes -> research/results/scenario_coverage.{json,md}
+python3 -m research.scenario_coverage                            # about 30-40 min on 7 processes -> research/results/scenario_coverage.{json,md}
 python3 -m research.scenario_coverage research/configs/smoke.json   # about 20 s pipeline check (not a result)
 python3 test_research.py                                         # includes "stored results match this code (digest), config and report"
 ```
 
-**Findings** (this simulator only; see the [report](research/results/scenario_coverage.md) and [V8 IMPLEMENTATION.md](docs/versions/v8/IMPLEMENTATION.md)):
+**Findings**, re-run in V9 on the corrected environment (this simulator only; see the [report](research/results/scenario_coverage.md), [V9 IMPLEMENTATION.md §8](docs/versions/v9/IMPLEMENTATION.md#8-results), and [V8 IMPLEMENTATION.md](docs/versions/v8/IMPLEMENTATION.md) for the original run):
 
-| Comparison with the hand-set rule, 40 held-out races | Mean difference | 95 % CI | Verdict |
+| Comparison with the hand-set rule, 40 held-out races, hidden pit loss | Mean difference | 95 % CI | Verdict |
 |---|---|---|---|
-| Tuned, random training (3 runs) | +0.43 to +1.21 s | none below 0 | does not help |
-| Tuned, stratified training (3 runs) | 0.00 to +1.35 s | none below 0 | does not help |
-| Fixed one-stop | +5.0 s | [+1.0, +10.3] | worse |
+| Tuned, random training (3 runs) | 0.00 to +2.36 s | none below 0 (one above) | does not help |
+| Tuned, stratified training (3 runs) | +0.09 to +0.77 s | none below 0 | does not help |
+| Fixed one-stop | −0.25 s | [−2.67, +2.26] | no difference |
+| Fixed one-stop, pit loss fixed at the old 22 s | +2.84 s | [+0.24, +5.84] | worse, almost all in wet races |
 
-1. **Negative result.** Stratified training did not make tuning beat the hand-set rule, and neither did random training.
-2. **The tuning overfits.** One run gained 4.3 s per race on its training races and lost 1.2 s per race on held-out races.
-3. **Thresholds matter little here.** No tuned variant moved the mean by more than 1.4 s per race. Reacting to weather and flags matters: the rule beats a fixed one-stop, mostly in wet races.
-4. **A V6 error can change a conclusion.** At the measured pit loss of 25.62 s, the rule's advantage over the fixed one-stop is no longer statistically clear (+2.6 s, CI [−0.9, +7.2]).
+1. **Negative result, confirmed.** Neither training design made tuning beat the hand-set rule, before or after the correction.
+2. **The tuning overfits.** Runs gained up to 3.4 s per race on their training races and lost 0.1–0.8 s per race on held-out races.
+3. **V7/V8's "the rule beats a fixed one-stop" came from the 22 s placeholder pit loss.** With the measured, randomised pit loss the difference disappears. At 22 s, extra stops in the rain pay; at about 25.6 s they do not (8 wet races only).
 
 Hierarchical and multi-agent RL were not attempted. The simulator exposes no lower-level decisions, and with a time-based reward rival agents barely affect each other (IMPLEMENTATION.md §3).
 
-Options: `StrategyEnv(laps, team, start_compound, pit_loss, neutralisation_chance, rain_chance, opponents=0-3, two_compound_rule, max_steps, dt, seed)`. `pit_loss=25.62` uses the Monza pit loss measured in V6.
+Options: `StrategyEnv(laps, team, start_compound, pit_loss, neutralisation_chance, rain_chance, opponents=0-3, two_compound_rule, max_steps, dt, seed, track, calibration)`. `laps`, `neutralisation_chance` and `rain_chance` default to the circuit's values. `pit_loss=None` (default) makes it hidden and random; a number fixes it. `calibration="baseline"` restores V7's grip of 1.8.
 
 V6 found the model's lap times, pit loss and tyre and fuel effects to be off or unvalidated, so anything learned here describes **this simulator**, not real F1. See [V7 IMPLEMENTATION.md](docs/versions/v7/IMPLEMENTATION.md).
 
@@ -504,6 +561,7 @@ python3 test_race_control.py    # V5 flags and transitions, VSC/SC, retirements,
 python3 test_validation.py      # V6 reference data, metrics, calibration reproducibility, report up to date
 python3 test_rl.py              # V7 environment API, masks, rewards, termination/truncation, seeding, baselines
 python3 test_research.py        # V8 config validation, runner, statistics, CEM, decision rule, failures, stored results
+python3 test_tracks.py          # V9 segment types, banking physics, radius rule, all 28 circuits
 ```
 
 Each file prints `ok` when all its tests pass. An assertion error means a test failed. The tests are plain `test_*` functions using only the standard library.
@@ -512,9 +570,9 @@ Each file prints `ok` when all its tests pass. An assertion error means a test f
 
 | File | Contents |
 |---|---|
-| `abstract_classes.py` | `CarSpecification`, `Car`, `TrackSegment`, `Straight`, `Corner`, `Track`, `TyreCompound` |
+| `abstract_classes.py` | `CarSpecification`, `Car`, `TrackSegment` (with `banking`, `points()`), `Straight`, `Corner`, `Hairpin`, `Spiral`, `Chicane`, `Esses`, `Track`, `TyreCompound` |
 | `cars.py` | `CARS`: placeholder car designs per team |
-| `tracks.py` | `Monza` built from straights and corners |
+| `tracks.py` | `CIRCUITS` (28 approximate real circuits), the builders `turn`, `hairpin`, `chicane`, `esses`, `spiral`, `straight`, `radius_for`; `MonzaV0` |
 | `physics.py` | Aerodynamic force, corner speed limit, acceleration and braking (grip is an input) |
 | `simulation.py` | `track_points`, `simulate_lap` (V0 flying lap) |
 | `tyres.py` | `Compound`, `COMPOUNDS`, `DRY_COMPOUNDS`, `Tyres` (wear, wet grip), `best_compound` |
@@ -528,7 +586,8 @@ Each file prints `ok` when all its tests pass. An assertion error means a test f
 | `research/` | V8: `config`, `runner`, `stats`, `cem`, `scenario_coverage`, `configs/`, `results/` |
 | `rl/` | V7: `env` (StrategyEnv), `policies` (baselines), `evaluate`, `experiment`, `reports/` |
 | `validation/` | V6 tooling: `fetch_reference`, `reference` (load/convert), `metrics`, `model`, `calibrate`, `evaluate`, `config/`, `reports/` |
-| `data/reference/` | V6 reference data (raw API responses) and its provenance |
+| `data/reference/` | V6 reference data (raw API responses), its provenance and its own licence (`LICENSE.md`) |
+| `NOTICE` | Third-party material and credits |
 | `test_*.py` | Tests |
 
 ## Version documentation
@@ -544,7 +603,16 @@ Each file prints `ok` when all its tests pass. An assertion error means a test f
 | V6 | [Implementation](docs/versions/v6/IMPLEMENTATION.md) · [Code flow](docs/versions/v6/CODE_FLOW.md) · [Changelog](docs/versions/v6/CHANGELOG.md) |
 | V7 | [Implementation](docs/versions/v7/IMPLEMENTATION.md) · [Code flow](docs/versions/v7/CODE_FLOW.md) · [Changelog](docs/versions/v7/CHANGELOG.md) |
 | V8 | [Implementation](docs/versions/v8/IMPLEMENTATION.md) · [Code flow](docs/versions/v8/CODE_FLOW.md) · [Changelog](docs/versions/v8/CHANGELOG.md) |
+| V9 | [Implementation](docs/versions/v9/IMPLEMENTATION.md) · [Code flow](docs/versions/v9/CODE_FLOW.md) · [Changelog](docs/versions/v9/CHANGELOG.md) |
 
 ## Roadmap
 
-All planned versions (V0–V8) are implemented. That does not mean the simulator is complete or validated. V6 found the baseline about 19 % slow at Monza, and most tyre, fuel, traffic, weather and race-control parameters are unvalidated placeholders.
+All planned versions (V0–V8) are implemented, and V9 was added on request. That does not mean the simulator is complete or validated. The circuits are approximations, only Monza is calibrated against real timing data, and most tyre, fuel, traffic, weather and race-control parameters are unvalidated assumptions. Since V9 these assumptions enter the RL environment as random ranges, not fixed values.
+
+## Licence and credits
+
+- **Code:** Apache License 2.0 ([LICENSE](LICENSE)). It is open source, and you may use, change and share it, including commercially.
+- **Timing data:** the files in `data/reference/raw/` (and the values reproduced from them in the validation report and `validation/config/calibrated.json`) come from the [Jolpica-F1](https://github.com/jolpica/jolpica-f1) project and its contributors (the Ergast-compatible API). They are under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/): credit required, non-commercial use only, adaptations under the same licence. See [data/reference/LICENSE.md](data/reference/LICENSE.md). Learning, research and portfolio use are non-commercial. For commercial use, Jolpica-F1's terms say to ask its maintainers.
+- **Circuit information:** [F1-Encyclopedia](https://github.com/LordZeusIsBack/F1-Encyclopedia) by **LordZeusIsBack** supplied the circuit lengths, race distances, corner types and estimated corner speeds. Wikipedia filled gaps and corrected some values. Details are in [NOTICE](NOTICE) and `tracks.py`.
+
+This is a summary, not legal advice.

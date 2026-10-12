@@ -4,19 +4,26 @@ One episode = one race. The agent controls the pit decisions of one car: once pe
 car reaches the line (the "box or stay out" call before pit entry), it chooses to stay out or to pit at that line for
 a given compound. Everything else (driving, traffic, weather, race control) is the V1-V5 simulator. Stdlib only; the signatures follow the
 Gymnasium convention: reset() -> (observation, info), step(action) -> (observation, reward, terminated, truncated, info).
+
+Since V9 the race runs on any circuit in tracks.CIRCUITS with the V6 calibrated grip, and every race draws hidden
+conditions the agent never observes directly: pit loss, fuel burn rate, tyre wear rate, and (as in V7) whether and when
+a VSC/safety car or a shower comes. The agent only sees their effects (fuel level, tyre wear, flags, wetness).
+info["scenario"] records them for analysis; a policy given info would be told the hidden values.
 """
 import random
 from typing import NamedTuple
 
 from abstract_classes import TyreCompound
 from cars import CARS
-from race import FUEL_CAPACITY, FUEL_PER_LAP, PIT_LOSS, Race, RaceCar
+from physics import TYRE_GRIP
+from race import FUEL_CAPACITY, FUEL_PER_KM, Race, RaceCar
 from race_control import Flag, Incident, RaceControl, RaceControlRules
 from simulation import simulate_lap
 from strategy import PitStop, Strategy
-from tracks import Monza
+from tracks import CIRCUITS
 from traffic import TrafficRules
 from tyres import COMPOUNDS
+from validation.model import load_config
 from weather import Weather, WeatherPoint
 
 # action 0 = stay out; action i > 0 = pit at the end of this lap for COMPOUND_ORDER[i - 1]
@@ -26,6 +33,10 @@ GAP_SCALE = 30.0  # s: gaps are reported as min(gap / GAP_SCALE, 1)
 RAIN_SCALE = 10.0  # mm/h: rain is reported as min(rain / RAIN_SCALE, 1)
 MAX_STOPS = 3  # stops are reported as min(stops / MAX_STOPS, 1)
 DECISION_DISTANCE = 300.0  # m before the line at which the pit call is made, model assumption
+GENERIC_PIT_LOSS = 22.5  # s, circuits without a measured pit loss: middle of F1-Encyclopedia's ~20-25 s (12, 16.5)
+PIT_LOSS_SPREAD = 2.5  # s, hidden pit loss = circuit value +- this, uniform
+FUEL_SPREAD = 0.08  # hidden burn rate = nominal x (1 +- this); the car is fuelled for the worst case
+WEAR_SPREAD = 0.25  # hidden tyre wear = circuit factor x (1 +- this), on every compound
 
 
 class Observation(NamedTuple):
@@ -74,29 +85,37 @@ class _AgentPlan:
 
 
 class StrategyEnv:
-    """Pit-strategy environment for one car at Monza. See docs/versions/v7/IMPLEMENTATION.md."""
+    """Pit-strategy environment for one car. See docs/versions/v7/IMPLEMENTATION.md and docs/versions/v9/."""
 
     def __init__(
         self,
-        laps: int = 53,
+        laps: int | None = None,  # None: the circuit's Grand Prix distance
         team: str = "McLaren",
         start_compound: TyreCompound = TyreCompound.MEDIUM,
-        pit_loss: float = PIT_LOSS,
-        neutralisation_chance: float = 0.5,
-        rain_chance: float = 0.25,
+        pit_loss: float | None = None,  # None: hidden, random per race; a number fixes it
+        neutralisation_chance: float | None = None,  # None: the circuit's value
+        rain_chance: float | None = None,  # None: the circuit's value
         opponents: int = 0,
         two_compound_rule: bool = True,
         max_steps: int | None = None,
         dt: float = 0.5,
         seed: int | None = None,
+        track: str = "Monza",
+        calibration: str = "calibrated",  # validation/config/<name>.json: "baseline" gives V7's grip 1.8
     ):
+        if track not in CIRCUITS:
+            raise ValueError(f"track must be one of {sorted(CIRCUITS)}")
+        circuit = CIRCUITS[track]
+        laps = circuit.laps if laps is None else laps
+        neutralisation_chance = circuit.neutralisation_chance if neutralisation_chance is None else neutralisation_chance
+        rain_chance = circuit.rain_chance if rain_chance is None else rain_chance
         if not isinstance(laps, int) or laps < 2:
             raise ValueError("laps must be an integer >= 2")
         if team not in CARS:
             raise ValueError(f"team must be one of {sorted(CARS)}")
         if start_compound not in COMPOUND_ORDER:
             raise ValueError(f"unknown start compound {start_compound!r}")
-        if not pit_loss >= 0 or not dt > 0:
+        if (pit_loss is not None and not pit_loss >= 0) or not dt > 0:
             raise ValueError("need pit_loss >= 0 and dt > 0")
         for chance in (neutralisation_chance, rain_chance):
             if not 0 <= chance <= 1:
@@ -105,11 +124,20 @@ class StrategyEnv:
             raise ValueError(f"opponents must be 0-{len(CARS) - 1}")
         if max_steps is not None and (not isinstance(max_steps, int) or max_steps < 1):
             raise ValueError("max_steps must be None or an integer >= 1")
+        self.track = circuit()  # one instance per environment, so lap profiles are cached across races
+        self.fuel_per_lap = FUEL_PER_KM * self.track.length / 1000  # kg, nominal
+        self.start_fuel = laps * self.fuel_per_lap * (1 + FUEL_SPREAD)  # kg, enough at the highest burn rate
+        if self.start_fuel > FUEL_CAPACITY:
+            raise ValueError(f"{laps} laps of {track} need {self.start_fuel:.1f} kg, more than the {FUEL_CAPACITY} kg tank")
         self.laps, self.team, self.start_compound = laps, team, start_compound
         self.pit_loss, self.dt, self.max_steps = pit_loss, dt, max_steps
         self.neutralisation_chance, self.rain_chance = neutralisation_chance, rain_chance
         self.opponents, self.two_compound_rule = opponents, two_compound_rule
-        self.reference_lap = simulate_lap(CARS[team], Monza())[0]  # s, reward scale: one V0 flying lap
+        config = load_config(calibration)
+        scale = config["tyre_grip"] / TYRE_GRIP  # as validation.model: every compound's grip scaled alike
+        self.compounds = {compound: spec._replace(grip=spec.grip * scale) for compound, spec in COMPOUNDS.items()}
+        self.base_pit_loss = self.track.pit_loss or GENERIC_PIT_LOSS
+        self.reference_lap = simulate_lap(CARS[team], self.track, config["tyre_grip"])[0]  # s, reward scale
         self._rng = random.Random(seed)
         self._race = None
 
@@ -120,7 +148,7 @@ class StrategyEnv:
         if seed is not None:
             self._rng = random.Random(seed)
         self.scenario = self._draw_scenario()
-        fuel = self.laps * FUEL_PER_LAP
+        fuel = self.start_fuel
         self._plan = _AgentPlan(self.start_compound, fuel)
         self._car = RaceCar(1, self.team, CARS[self.team], self._plan)
         rivals = [team for team in CARS if team != self.team][: self.opponents]
@@ -131,7 +159,11 @@ class StrategyEnv:
         ]
         self._rng.shuffle(grid)  # the ego car's grid slot is part of the scenario
         rules = RaceControlRules() if self.two_compound_rule else RaceControlRules(two_compound_penalty=0.0)
-        self._race = Race(Monza(), self.laps, grid, pit_loss=self.pit_loss,
+        hidden = self.scenario["hidden"]
+        compounds = {c: spec._replace(wear_per_lap=spec.wear_per_lap * hidden["tyre_wear"])
+                     for c, spec in self.compounds.items()}
+        self._race = Race(self.track, self.laps, grid, pit_loss=hidden["pit_loss"], fuel_per_lap=hidden["fuel_per_lap"],
+                          compounds=compounds,
                           traffic=TrafficRules() if self.opponents else None,  # alone: nobody to interact with
                           weather=self.scenario["weather"], race_control=RaceControl(self.scenario["incidents"], rules=rules))
         self._steps, self._last_time, self._done = 0, 0.0, False
@@ -175,7 +207,8 @@ class StrategyEnv:
     # ---- scenario --------------------------------------------------------------------------------------------
 
     def _draw_scenario(self) -> dict:
-        """Random (seeded) race events the agent cannot see in advance: a VSC or SC, a rain shower, the air temperature."""
+        """Random (seeded) race conditions the agent cannot see in advance: a VSC or SC, a rain shower, the air
+        temperature, then the hidden pit loss, fuel burn and tyre wear (drawn last, so V7's event draws keep their order)."""
         rng, expected = self._rng, self.laps * self.reference_lap * 1.05  # s, a rough race length
         air = round(rng.uniform(18.0, 32.0), 1)
         incidents = []
@@ -189,7 +222,13 @@ class StrategyEnv:
             length, rain = round(rng.uniform(300.0, 900.0), 1), round(rng.uniform(2.0, 10.0), 1)
             weather = Weather([WeatherPoint(0, air), WeatherPoint(start, air), WeatherPoint(start + 60, air, rain),
                                WeatherPoint(start + length, air, rain), WeatherPoint(start + length + 60, air)])
-        return {"incidents": incidents, "weather": weather, "air_temp": air}
+        pit_loss = round(self.base_pit_loss + rng.uniform(-PIT_LOSS_SPREAD, PIT_LOSS_SPREAD), 2)  # always drawn, so
+        hidden = {  # a fixed pit loss leaves the other draws of a seed unchanged
+            "pit_loss": pit_loss if self.pit_loss is None else self.pit_loss,
+            "fuel_per_lap": round(self.fuel_per_lap * rng.uniform(1 - FUEL_SPREAD, 1 + FUEL_SPREAD), 4),
+            "tyre_wear": round(self.track.tyre_wear * rng.uniform(1 - WEAR_SPREAD, 1 + WEAR_SPREAD), 3),
+        }
+        return {"incidents": incidents, "weather": weather, "air_temp": air, "hidden": hidden}
 
     # ---- observation and info ----------------------------------------------------------------------------------
 
@@ -234,5 +273,6 @@ class StrategyEnv:
             "flag": race.race_control.flag.name,
             "action_mask": self.action_mask(),
             "scenario": {"incidents": [(i.time, i.flag.name, i.duration) for i in self.scenario["incidents"]],
-                         "rain": self.scenario["weather"] is not None, "air_temp": self.scenario["air_temp"]},
+                         "rain": self.scenario["weather"] is not None, "air_temp": self.scenario["air_temp"],
+                         "hidden": self.scenario["hidden"]},
         }

@@ -7,7 +7,8 @@
 import statistics
 from pathlib import Path
 
-from tracks import Monza
+from cars import CARS
+from tracks import CIRCUITS, Monza
 from validation import metrics, reference
 from validation.model import flying_laps, load_config, race_time
 
@@ -48,6 +49,16 @@ def race(config: dict, season: int) -> dict:
     return {**won, "model": model}
 
 
+def circuits(configs: dict) -> list[tuple]:
+    """Per circuit: (name, straight scale, lap record, fastest model car's flying lap per config)."""
+    rows = []
+    for name, circuit in CIRCUITS.items():
+        track = circuit()
+        laps = {config: min(flying_laps(c, CARS, track).values()) for config, c in configs.items()}
+        rows.append((name, track.straight_scale, track.lap_record, laps))
+    return rows
+
+
 def evaluate() -> dict:
     configs = {name: load_config(name) for name in CONFIGS}
     length = reference.track_length(2024)
@@ -57,6 +68,7 @@ def evaluate() -> dict:
         "qualifying": {(n, s): qualifying(c, s) for n, c in configs.items() for s in SEASONS},
         "pit_loss": {(n, s): pit_loss(c, s) for n, c in configs.items() for s in SEASONS},
         "race": {(n, s): race(c, s) for n, c in configs.items() for s in SEASONS},
+        "circuits": circuits(configs),
     }
 
 
@@ -75,7 +87,7 @@ def render(result: dict) -> str:
         "|---|---|---|",
         *(f"| {name} | {c['tyre_grip']} | {c['pit_loss']} |" for name, c in configs.items()),
         "",
-        "## Track length (not calibrated)",
+        "## Track length (not calibrated; since V9 the model lap is built to the official length)",
         "",
         "| Model Monza (m) | Reference (m) | Error (m) | Relative error |",
         "|---|---|---|---|",
@@ -112,6 +124,19 @@ def render(result: dict) -> str:
         lines.append(f"| {name} | {season} ({SEASONS[season]}) | {r['driver']} ({r['team']}) | {r['laps']} "
                      f"| {', '.join(map(str, r['stop_laps']))} | {r['time']:.3f} | {r['model']:.3f} "
                      f"| {r['model'] - r['time']:+.3f} | {100 * metrics.relative_error(r['model'], r['time']):+.2f} % |")
+    errors = [metrics.relative_error(laps["calibrated"], record) for _, _, record, laps in result["circuits"]]
+    lines += ["", "## All circuits: fastest model car's flying lap vs the race lap record (sanity check only)", "",
+              "Not a validation: lap records are race laps, set by different cars in different years, and are usually "
+              "slower than qualifying laps, which the grip was calibrated on. Circuit layouts are approximations "
+              "(`tracks.py`): straight scale is the factor the estimated straights were stretched by to reach the "
+              "official lap length.", "",
+              "| Circuit | Straight scale | Record (s) | Model, baseline (s) | Model, calibrated (s) | Calibrated vs record |",
+              "|---|---|---|---|---|---|"]
+    for (name, scale, record, laps), error in zip(result["circuits"], errors):
+        lines.append(f"| {name} | {scale:.2f} | {record:.3f} | {laps['baseline']:.3f} | {laps['calibrated']:.3f} "
+                     f"| {100 * error:+.1f} % |")
+    lines += ["", f"Calibrated vs record over {len(errors)} circuits: median {100 * statistics.median(errors):+.1f} %, "
+              f"range {100 * min(errors):+.1f} % to {100 * max(errors):+.1f} %."]
     return "\n".join(lines) + "\n"
 
 

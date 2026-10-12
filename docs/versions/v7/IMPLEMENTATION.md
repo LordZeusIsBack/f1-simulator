@@ -1,5 +1,7 @@
 # V7: Reinforcement-learning environment (implementation)
 
+> **Later change (V9):** the environment now uses the calibrated grip, any circuit, and hidden random pit loss, fuel burn and tyre wear. The experiment was re-run; see [V9 IMPLEMENTATION.md §8.1](../v9/IMPLEMENTATION.md#8-results). The results below are V7's.
+
 ## 1. Objective and scope
 
 V7 turns the simulator into an **environment**: an agent observes a race, makes pit-stop decisions, gets rewards and can be trained over repeated, reproducible episodes. V7 provides:

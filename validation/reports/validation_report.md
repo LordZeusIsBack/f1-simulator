@@ -8,13 +8,13 @@ Do not edit by hand. 2024 = data used for calibration; 2025 = held out. Errors a
 | Config | tyre_grip | pit_loss (s) |
 |---|---|---|
 | baseline | 1.8 | 22.0 |
-| calibrated | 2.9358 | 25.62 |
+| calibrated | 2.4811 | 25.62 |
 
-## Track length (not calibrated)
+## Track length (not calibrated; since V9 the model lap is built to the official length)
 
 | Model Monza (m) | Reference (m) | Error (m) | Relative error |
 |---|---|---|---|
-| 5900.0 | 5793.0 | +107.0 | +1.85 % |
+| 5793.0 | 5793.0 | +0.0 | +0.00 % |
 
 ## Qualifying pace: model flying lap vs each team's best qualifying lap
 
@@ -22,45 +22,45 @@ Do not edit by hand. 2024 = data used for calibration; 2025 = held out. Errors a
 
 | Team | Reference (s) | Driver | Model (s) | Error (s) | Relative error |
 |---|---|---|---|---|---|
-| McLaren | 79.327 | NOR | 93.998 | +14.671 | +18.49 % |
-| Mercedes | 79.440 | RUS | 95.291 | +15.851 | +19.95 % |
-| Ferrari | 79.461 | LEC | 95.196 | +15.735 | +19.80 % |
-| Red Bull | 79.662 | VER | 94.555 | +14.893 | +18.69 % |
+| McLaren | 79.327 | NOR | 87.271 | +7.944 | +10.01 % |
+| Mercedes | 79.440 | RUS | 88.193 | +8.753 | +11.02 % |
+| Ferrari | 79.461 | LEC | 88.200 | +8.739 | +11.00 % |
+| Red Bull | 79.662 | VER | 87.667 | +8.005 | +10.05 % |
 
-MAE 15.287 s, bias +15.287 s, MAPE 19.24 %, max |error| 15.851 s. Fastest team: reference McLaren, model McLaren.
+MAE 8.360 s, bias +8.360 s, MAPE 10.52 %, max |error| 8.753 s. Fastest team: reference McLaren, model McLaren.
 
 ### baseline, 2025 (held out)
 
 | Team | Reference (s) | Driver | Model (s) | Error (s) | Relative error |
 |---|---|---|---|---|---|
-| Red Bull | 78.792 | VER | 94.555 | +15.763 | +20.01 % |
-| McLaren | 78.869 | NOR | 93.998 | +15.129 | +19.18 % |
-| Ferrari | 79.007 | LEC | 95.196 | +16.189 | +20.49 % |
-| Mercedes | 79.157 | RUS | 95.291 | +16.134 | +20.38 % |
+| Red Bull | 78.792 | VER | 87.667 | +8.875 | +11.26 % |
+| McLaren | 78.869 | NOR | 87.271 | +8.402 | +10.65 % |
+| Ferrari | 79.007 | LEC | 88.200 | +9.193 | +11.64 % |
+| Mercedes | 79.157 | RUS | 88.193 | +9.036 | +11.42 % |
 
-MAE 15.804 s, bias +15.804 s, MAPE 20.02 %, max |error| 16.189 s. Fastest team: reference Red Bull, model McLaren.
+MAE 8.876 s, bias +8.876 s, MAPE 11.24 %, max |error| 9.193 s. Fastest team: reference Red Bull, model McLaren.
 
 ### calibrated, 2024 (training)
 
 | Team | Reference (s) | Driver | Model (s) | Error (s) | Relative error |
 |---|---|---|---|---|---|
-| McLaren | 79.327 | NOR | 79.094 | -0.233 | -0.29 % |
-| Mercedes | 79.440 | RUS | 79.979 | +0.539 | +0.68 % |
-| Ferrari | 79.461 | LEC | 79.662 | +0.201 | +0.25 % |
-| Red Bull | 79.662 | VER | 79.154 | -0.508 | -0.64 % |
+| McLaren | 79.327 | NOR | 78.783 | -0.544 | -0.69 % |
+| Mercedes | 79.440 | RUS | 79.971 | +0.531 | +0.67 % |
+| Ferrari | 79.461 | LEC | 79.911 | +0.450 | +0.57 % |
+| Red Bull | 79.662 | VER | 79.226 | -0.436 | -0.55 % |
 
-MAE 0.370 s, bias -0.000 s, MAPE 0.47 %, max |error| 0.539 s. Fastest team: reference McLaren, model McLaren.
+MAE 0.490 s, bias +0.000 s, MAPE 0.62 %, max |error| 0.544 s. Fastest team: reference McLaren, model McLaren.
 
 ### calibrated, 2025 (held out)
 
 | Team | Reference (s) | Driver | Model (s) | Error (s) | Relative error |
 |---|---|---|---|---|---|
-| Red Bull | 78.792 | VER | 79.154 | +0.362 | +0.46 % |
-| McLaren | 78.869 | NOR | 79.094 | +0.225 | +0.29 % |
-| Ferrari | 79.007 | LEC | 79.662 | +0.655 | +0.83 % |
-| Mercedes | 79.157 | RUS | 79.979 | +0.822 | +1.04 % |
+| Red Bull | 78.792 | VER | 79.226 | +0.434 | +0.55 % |
+| McLaren | 78.869 | NOR | 78.783 | -0.086 | -0.11 % |
+| Ferrari | 79.007 | LEC | 79.911 | +0.904 | +1.14 % |
+| Mercedes | 79.157 | RUS | 79.971 | +0.814 | +1.03 % |
 
-MAE 0.516 s, bias +0.516 s, MAPE 0.65 %, max |error| 0.822 s. Fastest team: reference Red Bull, model McLaren.
+MAE 0.559 s, bias +0.516 s, MAPE 0.71 %, max |error| 0.904 s. Fastest team: reference Red Bull, model McLaren.
 
 ## Pit loss: model pit_loss vs measured stops (drivers of the four modelled teams)
 
@@ -75,7 +75,44 @@ MAE 0.516 s, bias +0.516 s, MAPE 0.65 %, max |error| 0.822 s. Fastest team: refe
 
 | Config | Season | Winner | Laps | Stops on laps | Reference (s) | Model (s) | Error (s) | Relative error |
 |---|---|---|---|---|---|---|---|---|
-| baseline | 2024 (training) | LEC (Ferrari) | 53 | 15 | 4480.727 | 5174.123 | +693.396 | +15.48 % |
-| baseline | 2025 (held out) | VER (Red Bull) | 53 | 37 | 4404.325 | 5143.362 | +739.037 | +16.78 % |
-| calibrated | 2024 (training) | LEC (Ferrari) | 53 | 15 | 4480.727 | 4362.337 | -118.390 | -2.64 % |
-| calibrated | 2025 (held out) | VER (Red Bull) | 53 | 37 | 4404.325 | 4313.183 | -91.142 | -2.07 % |
+| baseline | 2024 (training) | LEC (Ferrari) | 53 | 15 | 4480.727 | 4790.625 | +309.898 | +6.92 % |
+| baseline | 2025 (held out) | VER (Red Bull) | 53 | 37 | 4404.325 | 4764.885 | +360.560 | +8.19 % |
+| calibrated | 2024 (training) | LEC (Ferrari) | 53 | 15 | 4480.727 | 4354.414 | -126.313 | -2.82 % |
+| calibrated | 2025 (held out) | VER (Red Bull) | 53 | 37 | 4404.325 | 4321.519 | -82.806 | -1.88 % |
+
+## All circuits: fastest model car's flying lap vs the race lap record (sanity check only)
+
+Not a validation: lap records are race laps, set by different cars in different years, and are usually slower than qualifying laps, which the grip was calibrated on. Circuit layouts are approximations (`tracks.py`): straight scale is the factor the estimated straights were stretched by to reach the official lap length.
+
+| Circuit | Straight scale | Record (s) | Model, baseline (s) | Model, calibrated (s) | Calibrated vs record |
+|---|---|---|---|---|---|
+| Monza | 1.21 | 81.046 | 87.271 | 78.783 | -2.8 % |
+| Spa | 1.43 | 106.286 | 108.234 | 95.911 | -9.8 % |
+| Silverstone | 1.20 | 87.097 | 95.842 | 82.629 | -5.1 % |
+| Monaco | 1.23 | 72.909 | 77.861 | 68.543 | -6.0 % |
+| Barcelona | 1.18 | 78.149 | 82.747 | 72.467 | -7.3 % |
+| Zandvoort | 1.47 | 71.097 | 65.496 | 58.603 | -17.6 % |
+| RedBullRing | 0.94 | 65.619 | 77.029 | 67.150 | +2.3 % |
+| Hungaroring | 0.97 | 76.627 | 87.624 | 75.802 | -1.1 % |
+| Imola | 1.33 | 75.484 | 81.601 | 74.350 | -1.5 % |
+| Madrid | 0.89 | 95.587 | 103.208 | 90.740 | -5.1 % |
+| Istanbul | 1.00 | 84.770 | 99.334 | 86.336 | +1.8 % |
+| COTA | 1.23 | 96.169 | 98.345 | 86.534 | -10.0 % |
+| Miami | 1.03 | 89.708 | 95.136 | 83.918 | -6.5 % |
+| Mexico | 0.94 | 77.774 | 76.013 | 66.453 | -14.6 % |
+| Interlagos | 1.09 | 70.540 | 81.003 | 71.616 | +1.5 % |
+| LasVegas | 0.99 | 95.490 | 98.899 | 90.306 | -5.4 % |
+| Montreal | 1.02 | 73.078 | 74.972 | 67.832 | -7.2 % |
+| Bahrain | 1.02 | 91.447 | 96.222 | 84.893 | -7.2 % |
+| Jeddah | 1.24 | 90.734 | 90.366 | 77.670 | -14.4 % |
+| Suzuka | 1.21 | 90.983 | 89.137 | 78.328 | -13.9 % |
+| Shanghai | 1.18 | 92.238 | 98.007 | 87.339 | -5.3 % |
+| Singapore | 0.98 | 94.486 | 98.244 | 87.266 | -7.6 % |
+| Lusail | 1.52 | 84.319 | 85.915 | 75.272 | -10.7 % |
+| YasMarina | 1.05 | 86.103 | 91.894 | 82.336 | -4.4 % |
+| Baku | 1.06 | 103.009 | 109.352 | 98.852 | -4.0 % |
+| AlbertPark | 1.21 | 80.235 | 84.635 | 74.511 | -7.1 % |
+| Sepang | 1.12 | 94.080 | 100.662 | 89.087 | -5.3 % |
+| Buddh | 1.04 | 87.249 | 93.361 | 82.146 | -5.8 % |
+
+Calibrated vs record over 28 circuits: median -5.9 %, range -17.6 % to +2.3 %.

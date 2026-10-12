@@ -2,18 +2,17 @@ import sys
 
 from abstract_classes import TyreCompound
 from cars import CARS
-from race import FUEL_PER_LAP, Race, RaceCar
+from race import FUEL_PER_KM, Race, RaceCar
 from simulation import simulate_lap
 from strategy import PitStop, Strategy
-from tracks import Monza
+from tracks import CIRCUITS
 
-RACE_LAPS = 53  # Monza's Grand Prix distance
 DT = 0.1  # s per race step; traffic decisions are made once per step
 
 
-def strategies(laps):
+def strategies(laps, fuel_per_lap):
     """Each team runs one car on each plan, so the two plans meet on identical cars."""
-    fuel = laps * FUEL_PER_LAP
+    fuel = laps * fuel_per_lap
     return [
         Strategy(TyreCompound.MEDIUM, fuel, name="no stop (M)"),
         Strategy(TyreCompound.MEDIUM, fuel, (PitStop(laps // 2, TyreCompound.HARD),), name="1 stop (M-H)"),
@@ -60,7 +59,11 @@ def print_overtakes(race):
 
 
 def main():
-    track = Monza()
+    """python3 main.py [laps] [track]: defaults to the track's Grand Prix distance at Monza. Tracks: see tracks.CIRCUITS."""
+    name = sys.argv[2] if len(sys.argv) > 2 else "Monza"
+    if name not in CIRCUITS:
+        sys.exit(f"unknown track {name!r}; choose from: {', '.join(CIRCUITS)}")
+    track = CIRCUITS[name]()
     print(f"{track.name} ({track.length:.0f} m)")
 
     for name, car in CARS.items():
@@ -71,11 +74,12 @@ def main():
             f"  top {max(speed) * 3.6:3.0f} km/h  slowest {min(speed) * 3.6:3.0f} km/h"
         )
 
-    laps = int(sys.argv[1]) if len(sys.argv) > 1 else RACE_LAPS
-    plans = strategies(laps)
+    laps = int(sys.argv[1]) if len(sys.argv) > 1 else track.laps
+    fuel_per_lap = FUEL_PER_KM * track.length / 1000
+    plans = strategies(laps, fuel_per_lap)
     entries = [(team, car, plan) for team, car in CARS.items() for plan in plans]
     grid = [RaceCar(number, team, car, plan) for number, (team, car, plan) in enumerate(entries, start=1)]
-    race = Race(track, laps, grid)
+    race = Race(track, laps, grid, fuel_per_lap=fuel_per_lap)
 
     while race.laps_completed(race.standings()[0]) < 1:
         race.step(DT)

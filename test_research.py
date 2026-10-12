@@ -24,7 +24,7 @@ def tiny_config(**changes) -> dict:
     """A 3-lap, minimal-budget configuration: exercises the whole pipeline in seconds (not a research result)."""
     config = {
         "name": "tiny", "question": "pipeline test", "decision_rule": "pipeline test", "laps": 3,
-        "env": {"team": "McLaren", "pit_loss": 22.0},
+        "env": {"team": "McLaren", "track": "Monza"},
         "designs": {"random": [{"neutralisation_chance": 0.5, "rain_chance": 0.25, "seeds": [0]}],
                     "stratified": [{"neutralisation_chance": 1.0, "rain_chance": 0.0, "seeds": [0]}]},
         "cem": {"runs": [0, 1], "iterations": 1, "population": 2, "elites": 1, "bounds": copy.deepcopy(BOUNDS)},
@@ -87,7 +87,9 @@ def test_invalid_configurations_are_rejected():
         lambda c: c["statistics"].update(bootstrap_resamples=10),
         lambda c: c.update(processes=0),
         lambda c: c.update(sensitivity={"pit_loss": -1}),
-        lambda c: c["env"].update(pit_loss="22"),
+        lambda c: c["env"].update(track="Nowhere"),
+        lambda c: c["env"].update(team="Williams"),
+        lambda c: c["env"].update(pit_loss=22.0),  # hidden since V9: only the sensitivity analysis may fix it
     ]
     validate(tiny_config())
     for mutate in cases:

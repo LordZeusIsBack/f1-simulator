@@ -16,7 +16,8 @@ from weather import Conditions, Weather
 
 GRID_SPACING = 8.0  # m between consecutive grid slots, model assumption
 PIT_LOSS = 22.0  # s a stop costs compared with driving past the pits, placeholder
-FUEL_PER_LAP = 1.9  # kg burned per lap, placeholder
+FUEL_PER_LAP = 1.9  # kg burned per lap, placeholder (V2; still the Race default)
+FUEL_PER_KM = 0.32  # kg/km, ~98 kg for 305 km, under the 110 kg race limit: model assumption (V9, per circuit length)
 FUEL_CAPACITY = 110.0  # kg, F1's 2019-2025 race-fuel limit used as the tank size
 REFUEL_RATE = 10.0  # kg/s while refuelling, placeholder
 FUEL_TOLERANCE = 1e-9  # kg, absorbs float rounding when checking fuel plans
@@ -84,7 +85,7 @@ class LapProfile:
         _, speed = simulate_lap(Car(replace(spec, mass=spec.mass + fuel)), track, tyre_grip)
         self.speed = speed + speed[:1]  # m/s at each table entry
         self.distance, self.time = [0.0], [0.0]  # m and s at each track point; the last entry closes the lap
-        for i, (ds, _, _) in enumerate(track_points(track)):
+        for i, (ds, *_) in enumerate(track_points(track)):
             self.distance.append(self.distance[-1] + ds)
             # same trapezoid as simulate_lap's lap time: average of the speeds at both ends of ds
             self.time.append(self.time[-1] + 2 * ds / (speed[i] + speed[(i + 1) % len(speed)]))

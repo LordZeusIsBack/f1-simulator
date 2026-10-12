@@ -25,9 +25,10 @@ def load_config(name: str, folder: Path = CONFIG) -> dict:
     return config
 
 
-def flying_laps(config: dict, teams) -> dict[str, float]:
-    """s: the V0 flying lap of each team's model car at Monza, no fuel, with the configured grip."""
-    track = Monza()
+def flying_laps(config: dict, teams, track=None) -> dict[str, float]:
+    """s: the V0 flying lap of each team's model car (at Monza unless another track is given), no fuel, with the
+    configured grip."""
+    track = track or Monza()
     return {team: simulate_lap(CARS[team], track, config["tyre_grip"])[0] for team in teams}
 
 

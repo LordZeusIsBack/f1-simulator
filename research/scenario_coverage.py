@@ -61,10 +61,11 @@ def train(config: dict, design: str, run: int) -> dict:
             "failed_episodes": len(failures), "errors": [f["error"] for f in failures][:5]}
 
 
-def evaluate(config: dict, policies: dict, pit_loss: float) -> dict[str, list[dict]]:
-    """Every policy on the same held-out seeds of the evaluation distribution."""
+def evaluate(config: dict, policies: dict, pit_loss: float | None) -> dict[str, list[dict]]:
+    """Every policy on the same held-out seeds of the evaluation distribution. pit_loss None: hidden and random."""
     evaluation = config["evaluation"]
-    env = env_key(laps=config["laps"], team=config["env"]["team"], pit_loss=pit_loss,
+    fixed = {} if pit_loss is None else {"pit_loss": pit_loss}
+    env = env_key(laps=config["laps"], **config["env"], **fixed,
                   neutralisation_chance=evaluation["neutralisation_chance"], rain_chance=evaluation["rain_chance"])
     seeds = range(evaluation["seeds_from"], evaluation["seeds_from"] + evaluation["episodes"])
     names = list(policies)
@@ -119,7 +120,7 @@ def run(config_path: Path = DEFAULT_CONFIG, results_dir: Path = RESULTS) -> dict
     record["training"] = trained
     policies = {name: BASELINE_POLICIES[name] for name in config["evaluation"]["baselines"]}
     policies.update({f"tuned {t['design']} run {t['run']}": RuleBased(**t["policy"]) for t in trained})
-    analyses = {"main": config["env"]["pit_loss"]}
+    analyses = {"main": None}
     if "pit_loss" in config["sensitivity"]:
         analyses["sensitivity"] = config["sensitivity"]["pit_loss"]
     record["evaluation"] = {}
@@ -172,9 +173,10 @@ def report(record: dict) -> str:
                      f"{p['wear_limit']}, {p['neutral_from']}-{p['neutral_to']}, {p['final_call']} | {t['failed_candidates']} |")
     for analysis, block in record["evaluation"].items():
         evaluation = config["evaluation"]
+        pit_loss = "hidden, random per race" if block["pit_loss"] is None else f"fixed at {block['pit_loss']} s"
         lines += [
             "",
-            f"## Evaluation: {analysis} (pit_loss {block['pit_loss']} s; seeds {evaluation['seeds_from']}-"
+            f"## Evaluation: {analysis} (pit loss {pit_loss}; seeds {evaluation['seeds_from']}-"
             f"{evaluation['seeds_from'] + evaluation['episodes'] - 1}; VSC/SC chance {evaluation['neutralisation_chance']}, "
             f"rain chance {evaluation['rain_chance']})",
             "",

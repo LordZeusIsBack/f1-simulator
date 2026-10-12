@@ -4,11 +4,15 @@ from unittest import TestCase
 import physics
 import race
 from abstract_classes import TyreCompound
-from rl.env import ACTIONS, COMPOUND_ORDER, Observation, StepResult, StrategyEnv
+from cars import CARS
+from rl.env import ACTIONS, COMPOUND_ORDER, FUEL_SPREAD, PIT_LOSS_SPREAD, WEAR_SPREAD, Observation, StepResult, StrategyEnv
 from rl.evaluate import BASELINES, compare, run_episode, summarise
 from rl.experiment import cross_entropy_search
 from rl.policies import PIT, STAY, FixedOneStop, RandomPolicy, RuleBased, stay_out
 from race_control import Flag
+from simulation import simulate_lap
+from tracks import CIRCUITS
+from validation.model import load_config
 
 assert_raises = TestCase().assertRaises
 QUIET = dict(neutralisation_chance=0.0, rain_chance=0.0)  # no random events: easy to reason about
@@ -26,9 +30,11 @@ def play(env, policy, seed=0):
 def test_construction_is_validated():
     for bad in (dict(laps=1), dict(laps=2.5), dict(team="Williams"), dict(pit_loss=-1), dict(dt=0),
                 dict(rain_chance=1.5), dict(neutralisation_chance=-0.1), dict(opponents=4), dict(max_steps=0),
-                dict(start_compound="soft")):
+                dict(start_compound="soft"), dict(track="Nurburgring"), dict(laps=100)):
         with assert_raises(ValueError):
             StrategyEnv(**bad)
+    with assert_raises(FileNotFoundError):
+        StrategyEnv(calibration="nope")
 
 
 def test_reset_gives_a_bounded_observation_and_info():
@@ -146,7 +152,7 @@ def test_integration_with_traffic_weather_and_race_control():
 
 def test_pit_call_sees_a_safety_car_that_starts_mid_lap():
     env = StrategyEnv(laps=10)
-    results = play(env, RuleBased(), seed=16)  # this seed's scenario: a safety car from about 305 s
+    results = play(env, RuleBased(), seed=16)  # this seed's scenario: a safety car from about 255 s
     assert results[0].info["scenario"]["incidents"][0][1] == "SAFETY_CAR"
     seen = [r for r in results if r.observation.safety_car == 1.0]
     assert seen and seen[0].info["flag"] == "SAFETY_CAR"
@@ -157,6 +163,49 @@ def test_pit_call_sees_a_safety_car_that_starts_mid_lap():
 def test_environment_leaves_the_simulator_unchanged():
     play(StrategyEnv(laps=4), RuleBased(), seed=2)
     assert physics.TYRE_GRIP == 1.8 and race.PIT_LOSS == 22.0
+
+
+def test_hidden_conditions_are_random_within_range_and_reach_the_race():
+    env = StrategyEnv(laps=3, **QUIET)
+    nominal_fuel, calibrated = env.fuel_per_lap, load_config("calibrated")
+    assert env.base_pit_loss == calibrated["pit_loss"] == CIRCUITS["Monza"].pit_loss  # V6's measured value
+    draws = []
+    for seed in range(40):
+        _, info = env.reset(seed=seed)
+        hidden = info["scenario"]["hidden"]
+        race = env._race
+        assert race.pit_loss == hidden["pit_loss"] and race.fuel_per_lap == hidden["fuel_per_lap"]
+        assert math.isclose(race.compounds[TyreCompound.MEDIUM].grip, calibrated["tyre_grip"])  # calibrated grip in use
+        assert all(math.isclose(race.compounds[c].wear_per_lap, env.compounds[c].wear_per_lap * hidden["tyre_wear"])
+                   for c in COMPOUND_ORDER)
+        assert abs(hidden["pit_loss"] - env.base_pit_loss) <= PIT_LOSS_SPREAD
+        assert abs(hidden["fuel_per_lap"] / nominal_fuel - 1) <= FUEL_SPREAD + 1e-3
+        assert abs(hidden["tyre_wear"] - 1) <= WEAR_SPREAD + 1e-3
+        assert env._car.fuel >= env.laps * hidden["fuel_per_lap"]  # fuelled for the worst case
+        draws.append(hidden)
+    for key in ("pit_loss", "fuel_per_lap", "tyre_wear"):
+        assert len({d[key] for d in draws}) > 30, key  # they really vary
+    fixed = StrategyEnv(laps=3, pit_loss=22.0, **QUIET)
+    assert {fixed.reset(seed=s)[1]["scenario"]["hidden"]["pit_loss"] for s in range(5)} == {22.0}
+    low, high = sorted(range(40), key=lambda s: draws[s]["tyre_wear"])[::39]  # the observation shows only the effect
+    worn = [play(env, stay_out, seed)[-2].observation.tyre_wear for seed in (low, high)]
+    assert worn[0] < worn[1]
+
+
+def test_calibration_and_circuit_settings():
+    calibrated = load_config("calibrated")["tyre_grip"]
+    assert math.isclose(StrategyEnv().reference_lap, simulate_lap(CARS["McLaren"], CIRCUITS["Monza"](), calibrated)[0])
+    baseline = StrategyEnv(calibration="baseline")
+    assert baseline.reference_lap == simulate_lap(CARS["McLaren"], CIRCUITS["Monza"]())[0]  # V7's grip 1.8
+    singapore = StrategyEnv(track="Singapore")
+    assert (singapore.laps, singapore.neutralisation_chance) == (62, 0.9) and singapore.base_pit_loss == 22.5
+    assert StrategyEnv(track="Singapore", neutralisation_chance=0.1).neutralisation_chance == 0.1
+
+
+def test_every_circuit_runs_an_episode():
+    for name in CIRCUITS:
+        episode = run_episode(StrategyEnv(track=name, laps=2), RuleBased(), seed=1)
+        assert episode["time"] > 0 and not episode["truncated"], name
 
 
 def test_summary_statistics_on_known_numbers():
