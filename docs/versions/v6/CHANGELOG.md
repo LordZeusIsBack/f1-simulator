@@ -6,7 +6,7 @@
 |---|---|
 | Branch | `ai-agent-branch` (never `main`) |
 | Parent (V5) | `1edec46` "docs(v5): record version commit hash in changelog" (V5 code is in `e22ce77`) |
-| V6 version commit | `PENDING` |
+| V6 version commit | `dd5f4e1c4a8398f0bd4e061e29f280d390cd6115` (`dd5f4e1`) |
 | Commit message | `feat(v6): add calibration and validation workflow` |
 
 As in earlier versions, the hash is recorded by a follow-up commit, `docs(v6): record version commit hash in changelog`, which changes only this table.
