@@ -4,7 +4,7 @@ A Python simulation of Formula 1 cars racing around a track. It grows one small,
 
 The physics, car parameters, track geometry, tyre and fuel values, traffic rules, weather model and race-control rules are **simplified placeholders**. V6 measures how far the model is from real F1 timing data. At Monza the baseline lap is about 19 % too slow; see [Validation](#validation-v6).
 
-## Current version: V6 — calibration and validation
+## Current version: V7 — reinforcement-learning environment
 
 - **V0:** a simplified physics model computes a flying-lap speed profile and lap time for one car.
 - **V1:** several cars start from a grid and race a set number of laps, with positions, laps and gaps.
@@ -22,12 +22,13 @@ The physics, car parameters, track geometry, tyre and fuel values, traffic rules
   - time and drive-through penalties, and a two-dry-compound rule;
   - a race-control event log;
   - a classification by race time including penalties, with retired cars at the bottom.
-- **V6 (new):** no new simulator features. V6 adds:
+- **V6:** no new simulator features. V6 adds:
   - a parameter audit;
   - a small real dataset (Monza 2024 and 2025, Jolpica-F1 / Ergast);
   - a repeatable validation workflow;
   - a 2-parameter calibration on 2024, evaluated on held-out 2025, with the baseline kept;
   - a generated report.
+- **V7 (new):** an RL environment, `rl.env.StrategyEnv`, with Gymnasium-style `reset()` and `step()`. The agent makes the pit calls for one car at Monza while random, seeded VSC/SC and rain scenarios play out. V7 also adds four baseline policies, a seeded evaluation harness, and a small policy-search experiment.
 
 ## Requirements and setup
 
@@ -385,6 +386,74 @@ Headline results (full numbers in [the report](validation/reports/validation_rep
 
 The calibrated grip (2.94) is an **effective** value that absorbs other model errors; it is not a real tyre property. The simulator defaults are unchanged. See [V6 IMPLEMENTATION.md](docs/versions/v6/IMPLEMENTATION.md) for what can and cannot be validated.
 
+## RL environment (V7)
+
+`rl/env.py` needs no extra installation: it uses the standard library only. Its signatures follow Gymnasium, so a `gymnasium.Env` wrapper can be added later.
+
+- **One episode** is one race. The agent controls one car's pit stops.
+- **Decision point:** once per lap, 300 m before the line, the agent chooses:
+
+  | Action | Meaning |
+  |---|---|
+  | 0 | stay out |
+  | 1 | pit for soft |
+  | 2 | pit for medium |
+  | 3 | pit for hard |
+  | 4 | pit for intermediate |
+  | 5 | pit for wet |
+
+  `info["action_mask"]` says which actions are allowed; pitting is not allowed on the last lap.
+- **Observation:** a `NamedTuple` of 19 floats in [0, 1]:
+  - progress;
+  - fitted compound (one-hot) and its wear;
+  - fuel;
+  - stops made, and whether the two-compound rule is met;
+  - flag (one-hot);
+  - wetness and rain;
+  - position and gaps.
+
+  It contains no scenario forecast and nothing about rivals' plans.
+- **Reward:** −(time since the last call) ÷ one reference lap. The final step includes penalties, so the episode return is −(race time + penalties) ÷ reference lap. `terminated` means the car finished; `truncated` means `max_steps` was reached.
+- **Randomness:** `reset(seed=s)` reproduces the whole episode: VSC or SC 50 % of the time, rain 25 %, and the air temperature.
+
+```python
+from rl.env import StrategyEnv
+from rl.policies import RuleBased
+
+env = StrategyEnv(laps=10)          # defaults: McLaren, mediums, pit_loss 22 s, alone, two-compound rule on
+policy = RuleBased()
+observation, info = env.reset(seed=16)
+done, total = False, 0.0
+while not done:
+    observation, reward, terminated, truncated, info = env.step(policy(observation, info["action_mask"]))
+    total += reward
+    done = terminated or truncated
+print(info["total_time"], info["pit_stops"], total)   # 1011.9075462319665 [(4, 'hard')] -10.765...
+```
+
+To evaluate and experiment (each 53-lap episode takes about 2 s):
+
+```bash
+python3 -m rl.evaluate --laps 53 --seeds 20   # 4 baselines on seeds 100-119: mean, std, min, max, paired difference to rule-based
+python3 -m rl.experiment                      # tune RuleBased's 4 thresholds with the cross-entropy method on seeds 0-2,
+                                              # then evaluate on seeds 100-119 -> rl/reports/experiment_report.md (about 7 min)
+```
+
+Result of the committed experiment ([report](rl/reports/experiment_report.md)), on 20 held-out races:
+
+| Policy | Compared with the hand-set rule-based policy |
+|---|---|
+| fixed one-stop | +4.2 ± 12.7 s, worse on 18 of 20 |
+| stay out | +40.7 s |
+| random | +164 s |
+| CEM-tuned version of the rule-based policy | +0.2 ± 5.4 s, no improvement |
+
+The tuning did not improve on the hand-set policy because its 3 training races had no VSC or Safety Car, so it overfitted.
+
+Options: `StrategyEnv(laps, team, start_compound, pit_loss, neutralisation_chance, rain_chance, opponents=0-3, two_compound_rule, max_steps, dt, seed)`. `pit_loss=25.62` uses the Monza pit loss measured in V6.
+
+V6 found the model's lap times, pit loss and tyre and fuel effects to be off or unvalidated, so anything learned here describes **this simulator**, not real F1. See [V7 IMPLEMENTATION.md](docs/versions/v7/IMPLEMENTATION.md).
+
 ## Testing
 
 ```bash
@@ -395,6 +464,7 @@ python3 test_traffic.py         # V3 drivers, nearby cars, dirty air, DRS, overt
 python3 test_weather.py         # V4 weather state, wetting/drying, wet grip, tyre suitability, rain mid-race
 python3 test_race_control.py    # V5 flags and transitions, VSC/SC, retirements, penalties, event order + V4/V5 regression
 python3 test_validation.py      # V6 reference data, metrics, calibration reproducibility, report up to date
+python3 test_rl.py              # V7 environment API, masks, rewards, termination/truncation, seeding, baselines
 ```
 
 Each file prints `ok` when all its tests pass. An assertion error means a test failed. The tests are plain `test_*` functions using only the standard library.
@@ -416,6 +486,7 @@ Each file prints `ok` when all its tests pass. An assertion error means a test f
 | `race_control.py` | `Flag`, `RaceControlRules`, `Incident`, `Penalty`, `ControlEvent`, `RaceControl` |
 | `race.py` | `RaceCar`, `OvertakeEvent`, `WeatherEvent`, `PitEvent`, `LapProfile`, `Race` |
 | `main.py` | Entry point |
+| `rl/` | V7: `env` (StrategyEnv), `policies` (baselines), `evaluate`, `experiment`, `reports/` |
 | `validation/` | V6 tooling: `fetch_reference`, `reference` (load/convert), `metrics`, `model`, `calibrate`, `evaluate`, `config/`, `reports/` |
 | `data/reference/` | V6 reference data (raw API responses) and its provenance |
 | `test_*.py` | Tests |
@@ -431,7 +502,8 @@ Each file prints `ok` when all its tests pass. An assertion error means a test f
 | V4 | [Implementation](docs/versions/v4/IMPLEMENTATION.md) · [Code flow](docs/versions/v4/CODE_FLOW.md) · [Changelog](docs/versions/v4/CHANGELOG.md) |
 | V5 | [Implementation](docs/versions/v5/IMPLEMENTATION.md) · [Code flow](docs/versions/v5/CODE_FLOW.md) · [Changelog](docs/versions/v5/CHANGELOG.md) |
 | V6 | [Implementation](docs/versions/v6/IMPLEMENTATION.md) · [Code flow](docs/versions/v6/CODE_FLOW.md) · [Changelog](docs/versions/v6/CHANGELOG.md) |
+| V7 | [Implementation](docs/versions/v7/IMPLEMENTATION.md) · [Code flow](docs/versions/v7/CODE_FLOW.md) · [Changelog](docs/versions/v7/CHANGELOG.md) |
 
 ## Roadmap
 
-V7 reinforcement-learning interface · V8 advanced strategy research.
+V8 advanced strategy research.
