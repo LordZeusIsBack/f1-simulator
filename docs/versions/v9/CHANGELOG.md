@@ -6,7 +6,7 @@
 |---|---|
 | Branch | `ai-agent-branch` (never `main`) |
 | Parent (V8) | `7bfd66a` "docs(v8): record version commit hash in changelog" |
-| V9 version commit | HASH_PLACEHOLDER |
+| V9 version commit | `441b36edc481084c8eb27c03a05ad0b20b4dabc3` (`441b36e`) |
 | Commit message | `feat(v9): add real circuits, new segment types and hidden race conditions` |
 
 As in earlier versions, the hash is recorded by a follow-up commit, `docs(v9): record version commit hash in changelog`, which changes only this table.
