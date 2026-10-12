@@ -6,7 +6,7 @@
 |---|---|
 | Branch | `ai-agent-branch` (never `main`) |
 | Parent (V2) | `97f759d` "docs(v2): record version commit hash in changelog" (V2 code is in `908961f`) |
-| V3 version commit | `PENDING` |
+| V3 version commit | `9fb02907110e98f7dc1535e0de2a0e5698648f77` (`9fb0290`) |
 | Commit message | `feat(v3): add traffic, overtaking, DRS and driver attributes` |
 
 As in V1 and V2, the hash is recorded by a follow-up commit, `docs(v3): record version commit hash in changelog`, which changes only this table.
