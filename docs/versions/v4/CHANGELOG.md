@@ -6,7 +6,7 @@
 |---|---|
 | Branch | `ai-agent-branch` (never `main`) |
 | Parent (V3) | `07bb68e` "docs(v3): record version commit hash in changelog" (V3 code is in `9fb0290`) |
-| V4 version commit | `PENDING` |
+| V4 version commit | `22b36680be0fd352bad4fced66cd469cee38bf24` (`22b3668`) |
 | Commit message | `feat(v4): add weather and changing track conditions` |
 
 As in earlier versions, the hash is recorded by a follow-up commit, `docs(v4): record version commit hash in changelog`, which changes only this table.
