@@ -6,7 +6,7 @@
 |---|---|
 | Branch | `ai-agent-branch` (never `main`) |
 | Parent (V7) | `3ef534b` "docs(v7): record version commit hash in changelog" (V7 code is in `66207f4`) |
-| V8 version commit | `PENDING` |
+| V8 version commit | `1874202768d1ec6ac79130ab147b28ebe36a7243` (`1874202`) |
 | Commit message | `feat(v8): add scenario-coverage strategy research experiment` |
 
 As in earlier versions, the hash is recorded by a follow-up commit, `docs(v8): record version commit hash in changelog`, which changes only this table.
