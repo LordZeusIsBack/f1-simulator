@@ -7,6 +7,7 @@ from itertools import accumulate
 from abstract_classes import Car, Track, TrackSegment, TyreCompound
 from drivers import Driver
 from physics import TYRE_GRIP
+from race_control import Flag, Incident, Penalty, RaceControl
 from simulation import simulate_lap, track_points
 from strategy import PitStop, Strategy
 from traffic import TrafficRules, can_attack, drs_enabled, required_advantage, time_factor
@@ -39,6 +40,9 @@ class RaceCar:
     drs: bool = False  # DRS usable on this lap
     attack: "OvertakeEvent | None" = None  # pass in progress, with the numbers that allowed it
     held_by: int | None = None  # number of the car this one is stuck behind
+    retired_at: float | None = None  # s of race time when the car stopped for good
+    penalty_time: float = 0.0  # s of time penalties, added to the finish time
+    drive_throughs: int = 0  # drive-through penalties still to serve
 
 
 @dataclass(frozen=True)
@@ -113,7 +117,7 @@ def _interpolate(x: float, xs: list[float], ys: list[float]) -> float:
 
 
 class Race:
-    """Race state: track, rules, cars in grid order, elapsed race time and the pit-stop log."""
+    """Race state: track, rules, cars in grid order, elapsed race time and the event logs."""
 
     def __init__(
         self,
@@ -126,6 +130,7 @@ class Race:
         compounds: dict[TyreCompound, Compound] = COMPOUNDS,
         traffic: TrafficRules | None = TrafficRules(),
         weather: Weather | None = None,
+        race_control: RaceControl | None = None,
     ):
         if not isinstance(laps, int) or laps < 1:
             raise ValueError(f"laps must be a positive integer, got {laps!r}")
@@ -137,6 +142,16 @@ class Race:
             raise ValueError("pit_loss and fuel_per_lap cannot be negative")
         if weather is not None and weather.time != 0:
             raise ValueError("weather must start at time 0: use a new Weather for each race")
+        if race_control is not None:
+            if race_control.events or race_control._next or race_control.flag is not Flag.GREEN:
+                raise ValueError("race_control has been used: use a new RaceControl for each race")
+            numbers = {car.number for car in grid}
+            for item in race_control.script:
+                car = item.car if isinstance(item, Penalty) else item.retire
+                if car is not None and car not in numbers:
+                    raise ValueError(f"race control names car #{car}, which is not in the race")
+                if isinstance(item, Incident) and item.segment is not None and not 0 <= item.segment < len(track.segments):
+                    raise ValueError(f"segment {item.segment} is not on this track")
         self.track = track
         self.laps = laps
         self.cars = grid
@@ -145,6 +160,7 @@ class Race:
         self.compounds = compounds
         self.traffic = traffic  # None: cars ignore each other (V2 behaviour)
         self.weather = weather  # None: always dry (V3 behaviour)
+        self.race_control = race_control  # None: always green, no incidents or penalties (V4 behaviour)
         self.weather_events: list[WeatherEvent] = []
         self._grip_wetness = weather.wetness if weather else 0.0  # wetness the current lap profiles were built for
         self.time = 0.0  # s since the start
@@ -165,6 +181,7 @@ class Race:
             car.tyres = Tyres(strategy.compound)
             car.pit_exit = 0.0
             car.drs, car.attack, car.held_by = False, None, None
+            car.retired_at, car.penalty_time, car.drive_throughs = None, 0.0, 0
             self._profiles[car.number] = self._profile(car)
 
     def _check(self, number: int, strategy: Strategy) -> None:
@@ -204,7 +221,11 @@ class Race:
 
     @property
     def finished(self) -> bool:
-        return all(car.finish_time is not None for car in self.cars)
+        return all(car.finish_time is not None or car.retired_at is not None for car in self.cars)
+
+    def total_time(self, car: RaceCar) -> float | None:
+        """s: finish time plus time penalties; None until the car has finished."""
+        return None if car.finish_time is None else car.finish_time + car.penalty_time
 
     def laps_completed(self, car: RaceCar) -> int:
         return car.laps
@@ -219,15 +240,87 @@ class Race:
             for car in self.cars:
                 if car.finish_time is None:
                     self._profiles[car.number] = self._profile(car)
+        rc = self.race_control
+        if rc:
+            self._apply_race_control()
+        safety_car = rc is not None and rc.flag is Flag.SAFETY_CAR
+        leader = next((car for car in self.standings() if self._on_track(car)), None) if safety_car else None
+        leader_laps = leader.laps if leader else 0
         factors: dict[int, float] = {}  # this step's time factor per car on track
-        for car in (self.cars if self.traffic is None else self.standings()):
+        in_order = self.traffic is not None or self.race_control is not None
+        for car in (self.standings() if in_order else self.cars):
+            if car.retired_at is not None:
+                continue
             if self.traffic is not None and self._on_track(car):
                 self._drive(car, end, factors)
+            elif self.race_control is not None and self._on_track(car):
+                ahead = self.car_ahead(car)
+                factor = self.race_control.pace_factor(car.driver.time_factor(), self._in_zone(car), ahead is None)
+                self._advance(car, end, factor, self._queue_limit(car, ahead))
             else:
                 self._advance(car, end, car.driver.time_factor())
+        if safety_car and end >= rc.ends_at and (leader is None or leader.laps > leader_laps):
+            rc.clear(end, self._running(), "safety car in; restart at the line")
         if self.weather:
             self._update_weather(dt, end)
         self.time = end
+
+    def _apply_race_control(self) -> None:
+        """Start of a step: apply scripted incidents and penalties that are due, then end expired flags."""
+        rc = self.race_control
+        cars = {car.number: car for car in self.cars}
+        for item in rc.due(self.time):
+            if isinstance(item, Penalty):
+                self._penalise(cars[item.car], item)
+                continue
+            zone = item.segment
+            if item.retire is not None:
+                car = cars[item.retire]
+                if car.finish_time is None and car.retired_at is None:
+                    car.retired_at, car.attack, car.held_by = self.time, None, None
+                    zone = self._segment_index(car) if zone is None else zone
+                    rc.log(self.time, "retirement", (car.number,), f"#{car.number} out on lap {car.laps + 1}: {item.reason}")
+                else:
+                    rc.log(self.time, "ignored", (car.number,), f"#{car.number} has already stopped: {item.reason}")
+            if item.flag is not None:
+                rc.call(item.flag, self.time, item.duration, zone, self._running(), item.reason)
+        if rc.flag in (Flag.YELLOW, Flag.VSC) and self.time >= rc.ends_at:
+            rc.clear(self.time, self._running(), f"{rc.flag.name} period over")
+
+    def _penalise(self, car: RaceCar, penalty: Penalty) -> None:
+        rc = self.race_control
+        if car.retired_at is not None:
+            rc.log(self.time, "ignored", (car.number,), f"{penalty.kind} penalty for retired #{car.number}: {penalty.reason}")
+        elif penalty.kind == "time":
+            car.penalty_time += penalty.seconds
+            rc.log(self.time, "penalty", (car.number,), f"+{penalty.seconds:g} s for #{car.number}: {penalty.reason}")
+        else:
+            car.drive_throughs += 1
+            rc.log(self.time, "penalty", (car.number,), f"drive-through for #{car.number}: {penalty.reason}")
+
+    def _running(self) -> tuple[int, ...]:
+        return tuple(car.number for car in self.cars if car.finish_time is None and car.retired_at is None)
+
+    def _in_zone(self, car: RaceCar) -> bool:
+        return self.race_control is not None and self.race_control.zone == self._segment_index(car)
+
+    def _queue_limit(self, car: RaceCar, ahead: RaceCar | None) -> float | None:
+        """Under the safety car a car may come no closer than sc_gap to the car ahead."""
+        rc = self.race_control
+        if rc is None or rc.flag is not Flag.SAFETY_CAR or ahead is None:
+            return None
+        return max(car.distance, ahead.distance - rc.rules.sc_gap)
+
+    def _overtaking_allowed(self, car: RaceCar) -> bool:
+        return self.race_control is None or self.race_control.overtaking_allowed(self._in_zone(car))
+
+    def _drs_allowed(self) -> bool:
+        """Race control allows DRS only under green on a track drier than drs_max_wetness."""
+        rc = self.race_control
+        if rc is None:
+            return True
+        wetness = self.weather.wetness if self.weather else 0.0
+        return rc.flag is Flag.GREEN and wetness <= rc.rules.drs_max_wetness
 
     def _update_weather(self, dt: float, end: float) -> None:
         """Advance the weather and log rain starting or stopping and changes of the most suitable compound."""
@@ -245,22 +338,36 @@ class Race:
         ahead = self.car_ahead(car)
         interval = self.interval(car, ahead) if ahead else math.inf
         segment = self._segment(car)
-        factor = factors[car.number] = time_factor(rules, car.driver, segment, interval, car.drs)
+        factor = time_factor(rules, car.driver, segment, interval, car.drs and self._drs_allowed())
+        if self.race_control:
+            factor = self.race_control.pace_factor(factor, self._in_zone(car), ahead is None)
+        factors[car.number] = factor
         if car.attack and (ahead is None or car.attack.defender != ahead.number):
-            car.attack = None  # the defender pitted or finished
-        limit = None  # m the car may not pass this step
-        if ahead and not car.attack and self._free_distance(car, end, factor) > ahead.distance - rules.min_gap:
+            car.attack = None  # the defender pitted, finished or retired
+        allowed = self._overtaking_allowed(car)
+        if car.attack and not allowed:  # flags out mid-pass: give it up
+            self.overtakes.append(replace(car.attack, time=end, outcome="aborted"))
+            car.attack = None
+        limit = self._queue_limit(car, ahead)  # m the car may not pass this step
+        held_up = False
+        closing = ahead and not car.attack and self._free_distance(car, end, factor) > ahead.distance - rules.min_gap
+        if closing and not allowed:  # no attempt under these flags: just stay behind
+            limit = min(limit if limit is not None else math.inf, max(car.distance, ahead.distance - rules.min_gap))
+        elif closing:
             # both speeds at the attacker's spot: who is quicker through this part of the track
             advantage = self._speed(car, car.distance, factor) - self._speed(ahead, car.distance, factors[ahead.number])
             required = required_advantage(rules, car.driver, ahead.driver)
-            attempt = OvertakeEvent(end, car.laps + 1, car.number, ahead.number, "attempt", advantage, required, car.drs)
+            drs = car.drs and self._drs_allowed()
+            attempt = OvertakeEvent(end, car.laps + 1, car.number, ahead.number, "attempt", advantage, required, drs)
             if can_attack(rules, segment, advantage, car.driver, ahead.driver):
                 car.attack = attempt
             else:
-                limit = max(car.distance, ahead.distance - rules.min_gap)
+                held = max(car.distance, ahead.distance - rules.min_gap)
+                limit = held if limit is None else min(limit, held)
+                held_up = True
                 if car.held_by != ahead.number:
                     self.overtakes.append(replace(attempt, outcome="held up"))
-        car.held_by = ahead.number if limit is not None else None
+        car.held_by = ahead.number if held_up else None
 
         laps = car.laps
         self._advance(car, end, factor, limit)
@@ -273,7 +380,8 @@ class Race:
             car.attack = None
         if car.laps > laps:  # DRS detection at the line
             ahead = self.car_ahead(car)
-            car.drs = bool(ahead) and car.pit_exit <= end and drs_enabled(rules, car.laps + 1, self.interval(car, ahead))
+            car.drs = (bool(ahead) and car.pit_exit <= end and self._drs_allowed()
+                       and drs_enabled(rules, car.laps + 1, self.interval(car, ahead)))
 
     def _advance(self, car: RaceCar, end: float, factor: float = 1.0, limit: float | None = None) -> None:
         """Move one car up to race time `end` (or up to `limit` m), handling every line crossing and pit stop.
@@ -307,10 +415,13 @@ class Race:
         return (car.laps + 1) * self.track.length if car.distance >= 0 else 0.0
 
     def _on_track(self, car: RaceCar) -> bool:
-        return car.finish_time is None and car.pit_exit <= self.time
+        return car.finish_time is None and car.retired_at is None and car.pit_exit <= self.time
+
+    def _segment_index(self, car: RaceCar) -> int:
+        return bisect_right(self._segment_starts, car.distance % self.track.length)
 
     def _segment(self, car: RaceCar) -> TrackSegment:
-        return self.track.segments[bisect_right(self._segment_starts, car.distance % self.track.length)]
+        return self.track.segments[self._segment_index(car)]
 
     def _free_distance(self, car: RaceCar, end: float, factor: float) -> float:
         """m the car would reach by `end` with nobody in its way (current lap profile, no line logic)."""
@@ -323,7 +434,7 @@ class Race:
         return self._profiles[car.number].speed_at(distance) / factor
 
     def car_ahead(self, car: RaceCar) -> RaceCar | None:
-        """Nearest car in front in race order that is on track (not finished, not in the pits); None for the leader."""
+        """Nearest car in front in race order that is on track (not finished, retired or in the pits); None for the leader."""
         ahead = [other for other in self.cars if self._on_track(other) and other.distance > car.distance]
         return min(ahead, key=lambda other: other.distance, default=None)
 
@@ -340,12 +451,35 @@ class Race:
         car.tyres = replace(car.tyres, laps=car.tyres.laps + 1)
         if car.laps == self.laps:
             car.finish_time = clock
+            if self.race_control:
+                self._finish_penalties(car, clock)
             return
         wetness = self.weather.wetness if self.weather else 0.0
         stop = self._strategies[car.number].stop_after(car.laps, car.tyres, wetness, self.compounds)
         if stop is not None:
             self._pit(car, stop, clock)
+        rc = self.race_control
+        if rc and car.drive_throughs and rc.flag in (Flag.GREEN, Flag.YELLOW):  # not served under VSC or SC
+            car.drive_throughs -= 1
+            car.pit_exit = max(car.pit_exit, clock) + rc.rules.drive_through_loss
+            rc.log(clock, "penalty served", (car.number,), f"#{car.number} drive-through after lap {car.laps}")
         self._profiles[car.number] = self._profile(car)
+
+    def _finish_penalties(self, car: RaceCar, clock: float) -> None:
+        """At the flag: unserved drive-throughs become time, and the two-compound rule is checked."""
+        rc = self.race_control
+        if car.drive_throughs:
+            seconds = car.drive_throughs * rc.rules.drive_through_loss
+            car.penalty_time += seconds
+            rc.log(clock, "penalty converted", (car.number,), f"#{car.number}: unserved drive-through -> +{seconds:g} s")
+            car.drive_throughs = 0
+        used = {self._strategies[car.number].compound}
+        used |= {stop.tyres_after.compound for stop in self.pit_events if stop.number == car.number}
+        wet_tyres = used & {TyreCompound.INTERMEDIATE, TyreCompound.WET}
+        if rc.rules.two_compound_penalty and not wet_tyres and len(used) < 2:
+            car.penalty_time += rc.rules.two_compound_penalty
+            rc.log(clock, "penalty", (car.number,),
+                   f"+{rc.rules.two_compound_penalty:g} s for #{car.number}: used only one dry compound")
 
     def _pit(self, car: RaceCar, stop: PitStop, clock: float) -> None:
         duration = self.pit_loss + stop.fuel / REFUEL_RATE  # refuelling adds to the stop, not in parallel
@@ -361,8 +495,12 @@ class Race:
         return self.standings()
 
     def standings(self) -> list[RaceCar]:
-        """Finished cars by finish time, then running cars by distance. Ties keep grid order."""
-        return sorted(
-            self.cars,
-            key=lambda car: (0, car.finish_time) if car.finish_time is not None else (1, -car.distance),
-        )
+        """Finished cars by total time (penalties included), then running cars, then retired cars, both by distance.
+
+        Ties keep grid order."""
+        def key(car):
+            if car.finish_time is not None:
+                return 0, self.total_time(car)
+            return (1 if car.retired_at is None else 2), -car.distance
+
+        return sorted(self.cars, key=key)

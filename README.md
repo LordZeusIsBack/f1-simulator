@@ -2,9 +2,9 @@
 
 A Python simulation of Formula 1 cars racing around a track. It grows one small, documented version at a time, towards a platform for race-strategy and reinforcement-learning experiments.
 
-The physics, car parameters, track geometry, tyre and fuel values, traffic rules and weather model are **simplified placeholders**. Results are not validated against real F1 data; see the limitations in each version's docs.
+The physics, car parameters, track geometry, tyre and fuel values, traffic rules, weather model and race-control rules are **simplified placeholders**. Results are not validated against real F1 data; see the limitations in each version's docs.
 
-## Current version: V4 — weather and changing track conditions
+## Current version: V5 — race control, incidents and penalties
 
 - **V0:** a simplified physics model computes a flying-lap speed profile and lap time for one car.
 - **V1:** several cars start from a grid and race a set number of laps, with positions, laps and gaps.
@@ -15,7 +15,13 @@ The physics, car parameters, track geometry, tyre and fuel values, traffic rules
   - a car can only pass on a straight with enough speed advantage, otherwise it is held up behind.
 
   Drivers have `pace` and `racecraft`. Every pass and refused attempt is logged.
-- **V4 (new):** a scripted weather timeline sets air temperature and rain. Track wetness rises and falls smoothly, and wetness costs slicks far more grip than intermediates or wets, so the best tyre changes. Strategies can react by pitting for better tyres. Rain changes and changes of the best tyre are logged.
+- **V4:** a scripted weather timeline sets air temperature and rain. Track wetness rises and falls smoothly, and wetness costs slicks far more grip than intermediates or wets, so the best tyre changes. Strategies can react by pitting for better tyres. Rain changes and changes of the best tyre are logged.
+- **V5 (new):** race control:
+  - a local yellow, a Virtual Safety Car and a Safety Car, each with defined effects and a defined end;
+  - scripted incidents that call flags and/or retire cars;
+  - time and drive-through penalties, and a two-dry-compound rule;
+  - a race-control event log;
+  - a classification by race time including penalties, with retired cars at the bottom.
 
 ## Requirements and setup
 
@@ -98,6 +104,29 @@ To reproduce earlier versions:
 - **V1:** `fuel_per_lap=0.0`, `compounds={TyreCompound.MEDIUM: Compound(TYRE_GRIP, 0.0)}` and `traffic=None`.
 - **V2:** `traffic=None`.
 - **V3:** `weather=None`, the default.
+- **V4:** `race_control=None`, the default.
+
+### Race control (V5)
+
+| Where | Option | Default | Meaning |
+|---|---|---|---|
+| `Race(...)` | `race_control` | `None` | A `RaceControl`; `None` means always green, no incidents or penalties (V4). Use a new one for each race. |
+| `race_control.py` | `RaceControl(incidents, penalties, rules)` | — | Scripted incidents and penalties plus the rules |
+| `race_control.py` | `Incident(time, flag=None, duration=0, retire=None, segment=None, reason="")` | — | At `time` s: retire car `retire` and/or call `Flag.YELLOW` (in `segment`, or where the car stopped), `VSC` or `SAFETY_CAR` for `duration` s |
+| `race_control.py` | `Penalty(time, car, kind="time", seconds=5.0, reason="")` | — | `"time"`: + `seconds` to the race time. `"drive-through"`: a 20 s pit-lane pass at the next green or yellow crossing (+20 s if the car finishes first). |
+| `RaceControlRules` | `yellow_slowdown` | 0.10 | 10 % slower inside the yellow segment, no passing there |
+| `RaceControlRules` | `vsc_factor` | 1.40 | Every car 40 % slower, no passing |
+| `RaceControlRules` | `sc_factor`, `sc_catch_up_factor`, `sc_gap` | 1.60, 1.30, 10 m | SC queue: the leader at 1.6, the others close up at 1.3 to 10 m apart, no passing |
+| `RaceControlRules` | `drive_through_loss` | 20 s | Cost of a drive-through |
+| `RaceControlRules` | `two_compound_penalty` | 30 s | For a finisher with no wet tyres and only one dry compound; 0 = off |
+| `RaceControlRules` | `drs_max_wetness` | 0.3 | DRS only under green and on a track no wetter than this |
+
+Flags only escalate (GREEN → YELLOW → VSC → SAFETY_CAR). Each one ends by itself:
+
+- YELLOW and VSC end after their duration;
+- the SC ends after its duration, at the moment the leader crosses the line.
+
+`race.standings()` ranks finished cars by `race.total_time(car)` (finish time plus penalties), then running cars, then retired cars.
 
 ## Strategy comparison example
 
@@ -248,6 +277,81 @@ What it shows:
 - **The reacting car wins by 63 s.** It pits for inters, then wets. Its last stop, after lap 19 of 20, is wasted, because the simple rule ignores how many laps remain.
 - **The car that stays out suffers in the wet.** On mediums it laps up to about 133 s, against about 110 s for the car on wets.
 
+## Race control example
+
+This race runs 12 laps of Monza with 6 cars. During it:
+
+- one car retires and brings out a yellow;
+- a Safety Car comes out;
+- one car gets a time penalty and another a drive-through;
+- the two no-stop cars break the two-compound rule.
+
+It takes about 3 s:
+
+```bash
+python3 - <<'EOF'
+from abstract_classes import TyreCompound as T
+from cars import CARS
+from race import FUEL_PER_LAP, Race, RaceCar
+from race_control import Flag, Incident, Penalty, RaceControl
+from strategy import PitStop, Strategy
+from tracks import Monza
+
+laps = 12
+one_stop = Strategy(T.MEDIUM, laps * FUEL_PER_LAP, (PitStop(6, T.HARD),), name="1 stop")
+no_stop = Strategy(T.MEDIUM, laps * FUEL_PER_LAP, name="no stop")
+entries = [("McLaren", one_stop), ("Red Bull", one_stop), ("Ferrari", one_stop),
+           ("Mercedes", no_stop), ("McLaren", one_stop), ("Red Bull", no_stop)]
+grid = [RaceCar(n, team, CARS[team], plan) for n, (team, plan) in enumerate(entries, start=1)]
+control = RaceControl(
+    incidents=[
+        Incident(300, Flag.YELLOW, 40, retire=3, reason="Ferrari #3 stops"),
+        Incident(500, Flag.SAFETY_CAR, 120, segment=0, reason="debris on the main straight"),
+    ],
+    penalties=[
+        Penalty(150, 2, "time", 5, reason="track limits"),
+        Penalty(200, 5, "drive-through", reason="unsafe release"),
+    ],
+)
+race = Race(Monza(), laps, grid, race_control=control)
+race.run(0.1)
+for e in control.events:
+    print(f"{e.time:7.1f} s  {e.kind:<16} {e.flag.name:<10} {e.detail}")
+for position, car in enumerate(race.standings(), start=1):
+    result = "DNF" if car.retired_at is not None else f"{race.total_time(car):8.3f} s"
+    penalty = f"  (incl. +{car.penalty_time:g} s penalty)" if car.penalty_time else ""
+    print(f"{position}. #{car.number} {car.team:<8} {car.strategy.name:<7} {result}{penalty}")
+EOF
+```
+
+Expected output:
+
+```
+  150.1 s  penalty          GREEN      +5 s for #2: track limits
+  200.1 s  penalty          GREEN      drive-through for #5: unsafe release
+  286.1 s  penalty served   GREEN      #5 drive-through after lap 3
+  300.1 s  retirement       GREEN      #3 out on lap 4: Ferrari #3 stops
+  300.1 s  flag             YELLOW     GREEN -> YELLOW: Ferrari #3 stops
+  340.1 s  flag             GREEN      YELLOW -> GREEN: YELLOW period over
+  500.0 s  flag             SAFETY_CAR GREEN -> SAFETY_CAR: debris on the main straight
+  760.6 s  flag             GREEN      SAFETY_CAR -> GREEN: safety car in; restart at the line
+ 1238.1 s  penalty          GREEN      +30 s for #6: used only one dry compound
+ 1240.8 s  penalty          GREEN      +30 s for #4: used only one dry compound
+1. #1 McLaren  1 stop  1233.857 s
+2. #5 McLaren  1 stop  1238.207 s
+3. #2 Red Bull 1 stop  1242.489 s  (incl. +5 s penalty)
+4. #6 Red Bull no stop 1268.120 s  (incl. +30 s penalty)
+5. #4 Mercedes no stop 1270.767 s  (incl. +30 s penalty)
+6. #3 Ferrari  1 stop  DNF
+```
+
+What happens:
+
+- **The SC bunches the field and lasts 260 s.** It ends only when the leader crosses the line after its 120 s minimum.
+- **Cheap stops reshuffle the order.** The one-stoppers pit under the SC, so the no-stoppers lead the restart, but they are passed within 14 s.
+- **The 5 s penalty costs #2 a place.** #2 crosses the line 0.7 s ahead of #5 but is classified behind it.
+- **The retired #3 is classified last.**
+
 ## Testing
 
 ```bash
@@ -256,6 +360,7 @@ python3 test_race.py            # V1 race behaviour (run with fuel and wear off)
 python3 test_tyres_fuel_pits.py # V2 tyres, fuel, pit stops, strategies + V2 result regression (traffic off)
 python3 test_traffic.py         # V3 drivers, nearby cars, dirty air, DRS, overtaking + V3 result regression
 python3 test_weather.py         # V4 weather state, wetting/drying, wet grip, tyre suitability, rain mid-race
+python3 test_race_control.py    # V5 flags and transitions, VSC/SC, retirements, penalties, event order + V4 regression
 ```
 
 Each file prints `ok` when all its tests pass. An assertion error means a test failed. The tests are plain `test_*` functions using only the standard library.
@@ -274,6 +379,7 @@ Each file prints `ok` when all its tests pass. An assertion error means a test f
 | `drivers.py` | `Driver` (pace, racecraft) |
 | `weather.py` | `WeatherPoint`, `Conditions`, `Weather` (timeline, wetness, track temperature) |
 | `traffic.py` | `TrafficRules` and rule functions: dirty air, DRS, overtaking |
+| `race_control.py` | `Flag`, `RaceControlRules`, `Incident`, `Penalty`, `ControlEvent`, `RaceControl` |
 | `race.py` | `RaceCar`, `OvertakeEvent`, `WeatherEvent`, `PitEvent`, `LapProfile`, `Race` |
 | `main.py` | Entry point |
 | `test_*.py` | Tests |
@@ -287,7 +393,8 @@ Each file prints `ok` when all its tests pass. An assertion error means a test f
 | V2 | [Implementation](docs/versions/v2/IMPLEMENTATION.md) · [Code flow](docs/versions/v2/CODE_FLOW.md) · [Changelog](docs/versions/v2/CHANGELOG.md) |
 | V3 | [Implementation](docs/versions/v3/IMPLEMENTATION.md) · [Code flow](docs/versions/v3/CODE_FLOW.md) · [Changelog](docs/versions/v3/CHANGELOG.md) |
 | V4 | [Implementation](docs/versions/v4/IMPLEMENTATION.md) · [Code flow](docs/versions/v4/CODE_FLOW.md) · [Changelog](docs/versions/v4/CHANGELOG.md) |
+| V5 | [Implementation](docs/versions/v5/IMPLEMENTATION.md) · [Code flow](docs/versions/v5/CODE_FLOW.md) · [Changelog](docs/versions/v5/CHANGELOG.md) |
 
 ## Roadmap
 
-V5 race control and incidents · V6 calibration and validation · V7 reinforcement-learning interface · V8 advanced strategy research.
+V6 calibration and validation · V7 reinforcement-learning interface · V8 advanced strategy research.
