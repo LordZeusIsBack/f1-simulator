@@ -10,7 +10,8 @@ from physics import TYRE_GRIP
 from simulation import simulate_lap, track_points
 from strategy import PitStop, Strategy
 from traffic import TrafficRules, can_attack, drs_enabled, required_advantage, time_factor
-from tyres import COMPOUNDS, Compound, Tyres
+from tyres import COMPOUNDS, Compound, Tyres, best_compound
+from weather import Conditions, Weather
 
 GRID_SPACING = 8.0  # m between consecutive grid slots, model assumption
 PIT_LOSS = 22.0  # s a stop costs compared with driving past the pits, placeholder
@@ -18,6 +19,7 @@ FUEL_PER_LAP = 1.9  # kg burned per lap, placeholder
 FUEL_CAPACITY = 110.0  # kg, F1's 2019-2025 race-fuel limit used as the tank size
 REFUEL_RATE = 10.0  # kg/s while refuelling, placeholder
 FUEL_TOLERANCE = 1e-9  # kg, absorbs float rounding when checking fuel plans
+WETNESS_STEP = 0.05  # lap profiles are rebuilt mid-lap once wetness has moved this much, model resolution
 
 
 @dataclass
@@ -49,6 +51,14 @@ class OvertakeEvent:
     advantage: float  # m/s attacker speed advantage when the attempt was decided
     required: float  # m/s advantage the rules required
     drs: bool  # attacker had DRS
+
+
+@dataclass(frozen=True)
+class WeatherEvent:
+    time: float  # s of race time at the end of the step it happened in
+    kind: str  # "rain starts", "rain stops" or "best tyres" (the most suitable compound changed)
+    conditions: Conditions  # after the change
+    best: TyreCompound  # most suitable compound for these conditions
 
 
 @dataclass(frozen=True)
@@ -115,6 +125,7 @@ class Race:
         fuel_per_lap: float = FUEL_PER_LAP,
         compounds: dict[TyreCompound, Compound] = COMPOUNDS,
         traffic: TrafficRules | None = TrafficRules(),
+        weather: Weather | None = None,
     ):
         if not isinstance(laps, int) or laps < 1:
             raise ValueError(f"laps must be a positive integer, got {laps!r}")
@@ -124,6 +135,8 @@ class Race:
             raise ValueError("car numbers must be unique")
         if pit_loss < 0 or fuel_per_lap < 0:
             raise ValueError("pit_loss and fuel_per_lap cannot be negative")
+        if weather is not None and weather.time != 0:
+            raise ValueError("weather must start at time 0: use a new Weather for each race")
         self.track = track
         self.laps = laps
         self.cars = grid
@@ -131,6 +144,9 @@ class Race:
         self.fuel_per_lap = fuel_per_lap  # kg/lap
         self.compounds = compounds
         self.traffic = traffic  # None: cars ignore each other (V2 behaviour)
+        self.weather = weather  # None: always dry (V3 behaviour)
+        self.weather_events: list[WeatherEvent] = []
+        self._grip_wetness = weather.wetness if weather else 0.0  # wetness the current lap profiles were built for
         self.time = 0.0  # s since the start
         self.race_distance = laps * track.length  # m
         self.pit_events: list[PitEvent] = []
@@ -177,14 +193,14 @@ class Race:
             if fuel < self.fuel_per_lap - FUEL_TOLERANCE:
                 raise invalid(f"runs out of fuel on lap {lap}")
             fuel -= self.fuel_per_lap
-            stop = strategy.stop_after(lap)
+            stop = strategy.planned_stop(lap)
             if stop is not None:
                 fuel += stop.fuel
                 if fuel > FUEL_CAPACITY + FUEL_TOLERANCE:
                     raise invalid(f"refuelling after lap {lap} overfills the {FUEL_CAPACITY} kg tank")
 
     def _profile(self, car: RaceCar) -> LapProfile:
-        return lap_profile(car.car, self.track, car.tyres.grip(self.compounds), car.fuel)
+        return lap_profile(car.car, self.track, car.tyres.grip(self.compounds, self._grip_wetness), car.fuel)
 
     @property
     def finished(self) -> bool:
@@ -198,13 +214,30 @@ class Race:
         if dt <= 0:
             raise ValueError(f"dt must be positive, got {dt!r}")
         end = self.time + dt
+        if self.weather and abs(self.weather.wetness - self._grip_wetness) >= WETNESS_STEP:
+            self._grip_wetness = self.weather.wetness  # the track changed enough: new grip for every car, mid-lap
+            for car in self.cars:
+                if car.finish_time is None:
+                    self._profiles[car.number] = self._profile(car)
         factors: dict[int, float] = {}  # this step's time factor per car on track
         for car in (self.cars if self.traffic is None else self.standings()):
             if self.traffic is not None and self._on_track(car):
                 self._drive(car, end, factors)
             else:
                 self._advance(car, end, car.driver.time_factor())
+        if self.weather:
+            self._update_weather(dt, end)
         self.time = end
+
+    def _update_weather(self, dt: float, end: float) -> None:
+        """Advance the weather and log rain starting or stopping and changes of the most suitable compound."""
+        before = self.weather.conditions
+        after = self.weather.advance(dt)
+        best = best_compound(self.compounds, after.wetness)
+        if (before.rain > 0) != (after.rain > 0):
+            self.weather_events.append(WeatherEvent(end, "rain starts" if after.rain > 0 else "rain stops", after, best))
+        if best != best_compound(self.compounds, before.wetness):
+            self.weather_events.append(WeatherEvent(end, "best tyres", after, best))
 
     def _drive(self, car: RaceCar, end: float, factors: dict[int, float]) -> None:
         """One step for a car on track: traffic effects, the pass decision, the move, then the events."""
@@ -308,7 +341,8 @@ class Race:
         if car.laps == self.laps:
             car.finish_time = clock
             return
-        stop = self._strategies[car.number].stop_after(car.laps)
+        wetness = self.weather.wetness if self.weather else 0.0
+        stop = self._strategies[car.number].stop_after(car.laps, car.tyres, wetness, self.compounds)
         if stop is not None:
             self._pit(car, stop, clock)
         self._profiles[car.number] = self._profile(car)

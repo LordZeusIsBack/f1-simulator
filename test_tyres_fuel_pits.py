@@ -7,7 +7,7 @@ from race import FUEL_CAPACITY, REFUEL_RATE, LapProfile, Race, RaceCar
 from strategy import PitStop, Strategy
 from test_race import FAST, SLOW, V1_TYRES, lap_time
 from test_simulation import Stadium
-from tyres import COMPOUNDS, WORN_GRIP_LOSS, Compound, Tyres
+from tyres import COMPOUNDS, DRY_COMPOUNDS, WORN_GRIP_LOSS, Compound, Tyres
 
 assert_raises = TestCase().assertRaises
 SOFT, MEDIUM, HARD = TyreCompound.SOFT, TyreCompound.MEDIUM, TyreCompound.HARD
@@ -30,9 +30,9 @@ def test_dry_compounds_start_new_and_wet_ones_are_rejected():
         car, _ = solo(Strategy(compound, 4 * 1.9))
         assert car.tyres.compound is compound and car.tyres.laps == 4
     assert COMPOUNDS[MEDIUM].grip == TYRE_GRIP  # new mediums are V0's tyre
-    for compound in (TyreCompound.INTERMEDIATE, TyreCompound.WET, "soft"):
+    for compound in (TyreCompound.INTERMEDIATE, TyreCompound.WET, "soft"):  # not in V2's dry-only table
         with assert_raises(ValueError):
-            Race(Stadium(), 4, [RaceCar(1, "A", FAST, Strategy(compound, 10.0))])
+            Race(Stadium(), 4, [RaceCar(1, "A", FAST, Strategy(compound, 10.0))], compounds=DRY_COMPOUNDS)
 
 
 def test_wear_grows_per_lap_and_costs_grip_and_lap_time():
@@ -103,7 +103,7 @@ def test_impossible_pit_plans_are_rejected():
         Strategy(MEDIUM, 10.0, (PitStop(9, HARD),)),  # after the finish
         Strategy(MEDIUM, 10.0, (PitStop(2.5, HARD),)),  # not a lap
         Strategy(MEDIUM, 10.0, (PitStop(2, HARD), PitStop(2, SOFT))),  # two stops in one lap
-        Strategy(MEDIUM, 10.0, (PitStop(2, TyreCompound.WET),)),  # no wet tyres before V4
+        Strategy(MEDIUM, 10.0, (PitStop(2, TyreCompound.WET),)),  # not in the race's (dry-only) table
         Strategy(MEDIUM, 10.0, (PitStop(2),)),  # changes nothing
         Strategy(MEDIUM, 10.0, (PitStop(2, HARD, -1.0),)),  # removes fuel
         Strategy(MEDIUM, -1.0),  # negative start fuel
@@ -114,7 +114,7 @@ def test_impossible_pit_plans_are_rejected():
     ]
     for strategy in impossible:
         with assert_raises(ValueError):
-            Race(Stadium(), 4, [RaceCar(1, "A", FAST, strategy)], fuel_per_lap=1.9)
+            Race(Stadium(), 4, [RaceCar(1, "A", FAST, strategy)], fuel_per_lap=1.9, compounds=DRY_COMPOUNDS)
     for settings in (dict(pit_loss=-1.0), dict(fuel_per_lap=-0.1)):
         with assert_raises(ValueError):
             Race(Stadium(), 4, [RaceCar(1, "A", FAST)], **settings)

@@ -2,19 +2,20 @@
 
 A Python simulation of Formula 1 cars racing around a track. It grows one small, documented version at a time, towards a platform for race-strategy and reinforcement-learning experiments.
 
-The physics, car parameters, track geometry, tyre and fuel values, and traffic rules are **simplified placeholders**. Results are not validated against real F1 data; see the limitations in each version's docs.
+The physics, car parameters, track geometry, tyre and fuel values, traffic rules and weather model are **simplified placeholders**. Results are not validated against real F1 data; see the limitations in each version's docs.
 
-## Current version: V3 — traffic, overtaking, DRS and driver attributes
+## Current version: V4 — weather and changing track conditions
 
 - **V0:** a simplified physics model computes a flying-lap speed profile and lap time for one car.
 - **V1:** several cars start from a grid and race a set number of laps, with positions, laps and gaps.
 - **V2:** tyres wear and lose grip, and fuel burns off and makes the car lighter. Cars pit to change tyres and/or refuel, following a fixed strategy.
-- **V3 (new):** cars interact:
+- **V3:** cars interact:
   - dirty air costs pace in corners;
   - DRS helps on long straights;
   - a car can only pass on a straight with enough speed advantage, otherwise it is held up behind.
 
   Drivers have `pace` and `racecraft`. Every pass and refused attempt is logged.
+- **V4 (new):** a scripted weather timeline sets air temperature and rain. Track wetness rises and falls smoothly, and wetness costs slicks far more grip than intermediates or wets, so the best tyre changes. Strategies can react by pitting for better tyres. Rain changes and changes of the best tyre are logged.
 
 ## Requirements and setup
 
@@ -60,7 +61,7 @@ Plans that are impossible are rejected with `ValueError` before the race starts.
 - a stop on lap 0, or on the final lap;
 - two stops in one lap;
 - a stop that changes nothing;
-- wet tyres;
+- a compound not in the race's `compounds` table (since V4 the default table includes intermediates and wets);
 - negative fuel;
 - an overfilled tank;
 - running out of fuel.
@@ -79,7 +80,24 @@ Plans that are impossible are rejected with `ValueError` before the race starts.
 
 With traffic, results depend on the step size `dt`, because interactions are decided once per step. `main.py` uses 0.1 s.
 
-To reproduce V1 behaviour, use `fuel_per_lap=0.0`, `compounds={TyreCompound.MEDIUM: Compound(TYRE_GRIP, 0.0)}` and `traffic=None`. To reproduce V2, use `traffic=None`.
+### Weather (V4)
+
+| Where | Option | Default | Meaning |
+|---|---|---|---|
+| `Race(...)` | `weather` | `None` | A `Weather`; `None` means always dry (V3 behaviour). Use a new `Weather` for each race. |
+| `weather.py` | `Weather(timeline, wetness=0.0)` | — | Timeline of `WeatherPoint`s plus the starting wetness (0 dry to 1 fully wet) |
+| `weather.py` | `WeatherPoint(time, air_temp, rain=0.0)` | — | Keyframe: s, °C (−10 to 50), mm/h (0 to 50). Linear between keyframes, held before and after. |
+| `weather.py` | `WETTING_RATE`, `DRYING_RATE`, `DRYING_MIN_TEMP`, `SUN_HEATING` | 0.001 /s per mm/h, 3·10⁻⁵ /s per °C, 0 °C, 15 °C | dW/dt = k_wet(1 − W) − k_dry W; track temperature = air + 15 × (1 − W) |
+| `tyres.py` | `Compound(grip, wear_per_lap, wet_loss)` | slicks 0.65, inter 0.32, wet 0.15 | Fraction of grip lost on a fully wet track |
+| `tyres.py` | `COMPOUNDS` / `DRY_COMPOUNDS` | all five / slicks only | Compound tables (`DRY_COMPOUNDS` is V2's set) |
+| `strategy.py` | `Strategy(..., react_to_weather=False)`, `WEATHER_MARGIN` | off, 0.05 | Pit for `best_compound` when it has more than 5 % more grip than the current compound |
+| `race.py` | `WETNESS_STEP` | 0.05 | Lap profiles are rebuilt mid-lap whenever wetness has moved this much |
+
+To reproduce earlier versions:
+
+- **V1:** `fuel_per_lap=0.0`, `compounds={TyreCompound.MEDIUM: Compound(TYRE_GRIP, 0.0)}` and `traffic=None`.
+- **V2:** `traffic=None`.
+- **V3:** `weather=None`, the default.
 
 ## Strategy comparison example
 
@@ -170,13 +188,74 @@ What it shows:
 - **The Veteran waits for DRS too.** It needs only 2.0 m/s to pass the Mercedes, but it is stuck behind the Rookie's identical car until a DRS pass on the last lap.
 - **Without traffic** the McLarens simply drive through, the Rookie wins on grid position, and all three finish 0.7–2.4 s sooner.
 
+## Weather example
+
+A dry race turns wet, then dries again. It runs 20 laps of Monza with two identical McLarens on mediums: one stays out, the other reacts to the weather. It takes about 4 s:
+
+```bash
+python3 - <<'EOF'
+from abstract_classes import TyreCompound as T
+from cars import CARS
+from race import FUEL_PER_LAP, Race, RaceCar
+from strategy import Strategy
+from tracks import Monza
+from weather import Weather, WeatherPoint
+
+laps = 20
+timeline = [
+    WeatherPoint(0, 24.0),          # dry, 24 °C air
+    WeatherPoint(500, 24.0),
+    WeatherPoint(560, 21.0, 6.0),   # a shower builds to 6 mm/h over a minute
+    WeatherPoint(1100, 19.0, 6.0),
+    WeatherPoint(1160, 19.0, 0.0),  # rain stops; the track starts drying
+    WeatherPoint(2000, 22.0),
+]
+grid = [
+    RaceCar(1, "McLaren", CARS["McLaren"], Strategy(T.MEDIUM, laps * FUEL_PER_LAP, name="stays out")),
+    RaceCar(2, "McLaren", CARS["McLaren"], Strategy(T.MEDIUM, laps * FUEL_PER_LAP, name="reacts", react_to_weather=True)),
+]
+race = Race(Monza(), laps, grid, weather=Weather(timeline))
+race.run(0.1)
+for e in race.weather_events:
+    c = e.conditions
+    print(f"{e.time:6.1f} s  {e.kind:<11}  wetness {c.wetness:.2f}  track {c.track_temp:4.1f} °C  best: {e.best.value}")
+for stop in race.pit_events:
+    print(f"#{stop.number} pits after lap {stop.lap}: {stop.tyres_before.compound.value} -> {stop.tyres_after.compound.value}")
+for car in race.standings():
+    print(f"#{car.number} {car.strategy.name:<9} {car.finish_time:8.3f} s, finished on {car.tyres.compound.value}")
+EOF
+```
+
+Expected output:
+
+```
+ 500.0 s  rain starts  wetness 0.00  track 39.0 °C  best: soft
+ 621.0 s  best tyres   wetness 0.40  track 29.7 °C  best: intermediate
+ 748.6 s  best tyres   wetness 0.68  track 25.1 °C  best: wet
+1160.0 s  rain stops   wetness 0.87  track 21.0 °C  best: wet
+1513.0 s  best tyres   wetness 0.68  track 25.0 °C  best: intermediate
+2129.9 s  best tyres   wetness 0.40  track 30.9 °C  best: soft
+#2 pits after lap 7: medium -> intermediate
+#2 pits after lap 11: intermediate -> wet
+#2 pits after lap 19: wet -> intermediate
+#2 reacts    2172.144 s, finished on intermediate
+#1 stays out 2235.413 s, finished on medium
+```
+
+What it shows:
+
+- **The track wets and dries gradually.** Wetness rises during the shower and falls after it, and the best tyre follows it: soft → intermediate (W ≥ 0.40) → wet (W ≥ 0.68), then back.
+- **The reacting car wins by 63 s.** It pits for inters, then wets. Its last stop, after lap 19 of 20, is wasted, because the simple rule ignores how many laps remain.
+- **The car that stays out suffers in the wet.** On mediums it laps up to about 133 s, against about 110 s for the car on wets.
+
 ## Testing
 
 ```bash
 python3 test_simulation.py      # V0 physics + V0 lap-time regression
 python3 test_race.py            # V1 race behaviour (run with fuel and wear off) + V1 result regression
 python3 test_tyres_fuel_pits.py # V2 tyres, fuel, pit stops, strategies + V2 result regression (traffic off)
-python3 test_traffic.py         # V3 drivers, nearby cars, dirty air, DRS, overtaking
+python3 test_traffic.py         # V3 drivers, nearby cars, dirty air, DRS, overtaking + V3 result regression
+python3 test_weather.py         # V4 weather state, wetting/drying, wet grip, tyre suitability, rain mid-race
 ```
 
 Each file prints `ok` when all its tests pass. An assertion error means a test failed. The tests are plain `test_*` functions using only the standard library.
@@ -190,11 +269,12 @@ Each file prints `ok` when all its tests pass. An assertion error means a test f
 | `tracks.py` | `Monza` built from straights and corners |
 | `physics.py` | Aerodynamic force, corner speed limit, acceleration and braking (grip is an input) |
 | `simulation.py` | `track_points`, `simulate_lap` (V0 flying lap) |
-| `tyres.py` | `Compound`, `COMPOUNDS`, `Tyres` (wear and grip) |
+| `tyres.py` | `Compound`, `COMPOUNDS`, `DRY_COMPOUNDS`, `Tyres` (wear, wet grip), `best_compound` |
 | `strategy.py` | `PitStop`, `Strategy` |
 | `drivers.py` | `Driver` (pace, racecraft) |
+| `weather.py` | `WeatherPoint`, `Conditions`, `Weather` (timeline, wetness, track temperature) |
 | `traffic.py` | `TrafficRules` and rule functions: dirty air, DRS, overtaking |
-| `race.py` | `RaceCar`, `OvertakeEvent`, `PitEvent`, `LapProfile`, `Race` |
+| `race.py` | `RaceCar`, `OvertakeEvent`, `WeatherEvent`, `PitEvent`, `LapProfile`, `Race` |
 | `main.py` | Entry point |
 | `test_*.py` | Tests |
 
@@ -206,7 +286,8 @@ Each file prints `ok` when all its tests pass. An assertion error means a test f
 | V1 | [Implementation](docs/versions/v1/IMPLEMENTATION.md) · [Code flow](docs/versions/v1/CODE_FLOW.md) · [Changelog](docs/versions/v1/CHANGELOG.md) |
 | V2 | [Implementation](docs/versions/v2/IMPLEMENTATION.md) · [Code flow](docs/versions/v2/CODE_FLOW.md) · [Changelog](docs/versions/v2/CHANGELOG.md) |
 | V3 | [Implementation](docs/versions/v3/IMPLEMENTATION.md) · [Code flow](docs/versions/v3/CODE_FLOW.md) · [Changelog](docs/versions/v3/CHANGELOG.md) |
+| V4 | [Implementation](docs/versions/v4/IMPLEMENTATION.md) · [Code flow](docs/versions/v4/CODE_FLOW.md) · [Changelog](docs/versions/v4/CHANGELOG.md) |
 
 ## Roadmap
 
-V4 weather · V5 race control and incidents · V6 calibration and validation · V7 reinforcement-learning interface · V8 advanced strategy research.
+V5 race control and incidents · V6 calibration and validation · V7 reinforcement-learning interface · V8 advanced strategy research.

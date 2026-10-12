@@ -188,6 +188,19 @@ def test_traffic_race_is_deterministic():
     assert first == replay() and first[1]  # identical, and something happened
 
 
+
+def test_v3_race_results_unchanged_without_weather():
+    # recorded from V3 (commit 9fb0290): three cars, traffic on, one pit stop
+    grid = [RaceCar(1, "A", SLOW, driver=Driver(racecraft=0.2)), RaceCar(2, "B", FAST),
+            RaceCar(3, "C", FAST, Strategy(TyreCompound.SOFT, 6 * 1.9, (PitStop(3, TyreCompound.MEDIUM),)), Driver(pace=0.6))]
+    race = Race(Stadium(), 6, grid)
+    race.run(0.1)
+    v3 = {1: 153.14997972804318, 2: 144.53210636577248, 3: 166.7806183551926}
+    assert all(math.isclose(car.finish_time, v3[car.number], abs_tol=1e-6) for car in grid)
+    assert [(e.attacker, e.defender, e.outcome, round(e.time, 1)) for e in race.overtakes] == [
+        (2, 1, "passed", 2.8), (1, 2, "held up", 2.9), (3, 1, "passed", 4.4), (1, 3, "held up", 4.5), (3, 2, "aborted", 72.5)]
+
+
 if __name__ == "__main__":
     for name, test in list(globals().items()):
         if name.startswith("test_"):
