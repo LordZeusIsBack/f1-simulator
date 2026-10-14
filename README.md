@@ -40,6 +40,29 @@ The physics, car parameters, tyre and fuel values, traffic rules, weather model 
 
   See [Tracks](#tracks-v9) and [Licence and credits](#licence-and-credits).
 
+## Phase 2: AI driver (in progress)
+
+Phase 1 (V0–V9) built the race world and a pit-strategy agent. Phase 2 adds an AI driver in six milestones, ending with a driver and a strategist that decide at different levels. Phase 2 work is on `ai-agent-branch`.
+
+| Milestone | Status | Docs |
+|---|---|---|
+| P2-V1 Driver skills and profiles | **done** | [Implementation](docs/phase2/p2-v1/IMPLEMENTATION.md) · [Code flow](docs/phase2/p2-v1/CODE_FLOW.md) · [Changelog](docs/phase2/p2-v1/CHANGELOG.md) |
+| P2-V2 Driver decision interfaces and rule-based baseline policies | not started | |
+| P2-V3 On-track driving control | not started | |
+| P2-V4 Trainable AI driver | not started | |
+| P2-V5 Driver-versus-driver competition | not started | |
+| P2-V6 Hierarchical race intelligence | not started | |
+
+**P2-V1:** `Driver` gains five skills, each 0–1:
+- `attack` and `defence` split the V3 `racecraft` term of the overtaking rule. The speed advantage a pass needs is now 2.0 − 1.0 × (attacker's `attack` − defender's `defence`) m/s. Both default to the driver's `racecraft`, so existing profiles and results are unchanged.
+- `tyre_management`, `consistency` and `wet_weather` are **profile only**: stored and validated, with no effect on a race yet. Their planned mechanisms are in the [implementation notes](docs/phase2/p2-v1/IMPLEMENTATION.md#4-the-profile-attribute-by-attribute).
+
+```python
+Driver("Rookie", racecraft=0.1, defence=0.9)  # attacks like racecraft 0.1, defends like 0.9
+```
+
+Skill values are model inputs for fictional drivers, not ratings of real people.
+
 ## Requirements and setup
 
 - Python 3.12 or newer. There are no third-party dependencies.
@@ -562,6 +585,7 @@ python3 test_validation.py      # V6 reference data, metrics, calibration reprod
 python3 test_rl.py              # V7 environment API, masks, rewards, termination/truncation, seeding, baselines
 python3 test_research.py        # V8 config validation, runner, statistics, CEM, decision rule, failures, stored results
 python3 test_tracks.py          # V9 segment types, banking physics, radius rule, all 28 circuits
+python3 test_drivers.py         # P2-V1 driver profile: defaults, validation, attack/defence, profile-only skills
 ```
 
 Each file prints `ok` when all its tests pass. An assertion error means a test failed. The tests are plain `test_*` functions using only the standard library.
@@ -577,7 +601,7 @@ Each file prints `ok` when all its tests pass. An assertion error means a test f
 | `simulation.py` | `track_points`, `simulate_lap` (V0 flying lap) |
 | `tyres.py` | `Compound`, `COMPOUNDS`, `DRY_COMPOUNDS`, `Tyres` (wear, wet grip), `best_compound` |
 | `strategy.py` | `PitStop`, `Strategy` |
-| `drivers.py` | `Driver` (pace, racecraft) |
+| `drivers.py` | `Driver` (pace, racecraft; P2-V1: attack, defence, tyre_management, consistency, wet_weather) |
 | `weather.py` | `WeatherPoint`, `Conditions`, `Weather` (timeline, wetness, track temperature) |
 | `traffic.py` | `TrafficRules` and rule functions: dirty air, DRS, overtaking |
 | `race_control.py` | `Flag`, `RaceControlRules`, `Incident`, `Penalty`, `ControlEvent`, `RaceControl` |

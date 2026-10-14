@@ -15,8 +15,8 @@ class TrafficRules:
     drs_from_lap: int = 3  # first lap on which DRS can be used
     drs_min_straight: float = 500.0  # m, straights at least this long are DRS zones
     drs_gain: float = 0.035  # time fraction saved in a DRS zone (≈ 3.6 % more speed)
-    overtake_margin: float = 2.0  # m/s speed advantage needed to pass, between equal racecraft
-    racecraft_effect: float = 1.0  # m/s the margin changes per unit of racecraft difference
+    overtake_margin: float = 2.0  # m/s speed advantage needed to pass, when the attacker's attack equals the defender's defence
+    racecraft_effect: float = 1.0  # m/s the margin changes per unit of (attacker attack - defender defence)
 
 
 def is_straight(segment: TrackSegment) -> bool:
@@ -43,8 +43,8 @@ def drs_enabled(rules: TrafficRules, lap: int, interval: float) -> bool:
 
 
 def required_advantage(rules: TrafficRules, attacker: Driver, defender: Driver) -> float:
-    """m/s an attacker must be faster by; better racecraft than the defender lowers it."""
-    return rules.overtake_margin - rules.racecraft_effect * (attacker.racecraft - defender.racecraft)
+    """m/s an attacker must be faster by: the attacker's attack lowers it, the defender's defence raises it."""
+    return rules.overtake_margin - rules.racecraft_effect * (attacker.attack - defender.defence)
 
 
 def can_attack(rules: TrafficRules, segment: TrackSegment, advantage: float, attacker: Driver, defender: Driver) -> bool:
