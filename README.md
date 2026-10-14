@@ -47,7 +47,7 @@ Phase 1 (V0–V9) built the race world and a pit-strategy agent. Phase 2 adds an
 | Milestone | Status | Docs |
 |---|---|---|
 | P2-V1 Driver skills and profiles | **done** | [Implementation](docs/phase2/p2-v1/IMPLEMENTATION.md) · [Code flow](docs/phase2/p2-v1/CODE_FLOW.md) · [Changelog](docs/phase2/p2-v1/CHANGELOG.md) |
-| P2-V2 Driver decision interfaces and rule-based baseline policies | not started | |
+| P2-V2 Driver decision interfaces and rule-based baseline policies | **done** | [Implementation](docs/phase2/p2-v2/IMPLEMENTATION.md) · [Code flow](docs/phase2/p2-v2/CODE_FLOW.md) · [Changelog](docs/phase2/p2-v2/CHANGELOG.md) |
 | P2-V3 On-track driving control | not started | |
 | P2-V4 Trainable AI driver | not started | |
 | P2-V5 Driver-versus-driver competition | not started | |
@@ -62,6 +62,66 @@ Driver("Rookie", racecraft=0.1, defence=0.9)  # attacks like racecraft 0.1, defe
 ```
 
 Skill values are model inputs for fictional drivers, not ratings of real people.
+
+**P2-V2:** `driving.py` gives the driver its own decision interface, separate from the strategist's in `rl/policies.py`:
+- `observe(race, car)` builds a `DriverObservation`: 12 validated fields in physical units, such as gaps, closing speed, tyre wear, wetness and flag. Missing cars are `None`.
+- A driving policy is `policy(observation, driver) -> Decision(action, reason, features)`. The actions are `MAINTAIN_PACE`, `ATTACK`, `DEFEND` and `CONSERVE_TYRES`, and `decide` rejects unavailable ones.
+- There are three rule-based baselines, `CONSERVATIVE`, `BALANCED` and `AGGRESSIVE`. The driver's `attack`, `defence` and `tyre_management` shift their thresholds.
+- `run(race, policies)` logs every change of action with its reason and numbers.
+
+**The actions are proposals only:** they do not change the race yet (P2-V3).
+
+Example invoking each baseline (about 2 s):
+
+```bash
+python3 - <<'EOF'
+from collections import Counter
+
+from abstract_classes import TyreCompound
+from cars import CARS
+from drivers import Driver
+from driving import AGGRESSIVE, BALANCED, BASELINES, CONSERVATIVE, DriverObservation, run
+from race import Race, RaceCar
+from race_control import Flag
+from tracks import MonzaV0
+
+# 1. One situation, three policies: 0.8 s behind a car, 1.5 m/s faster, tyres 40 % worn, nobody behind
+seen = DriverObservation(laps_remaining=10, speed=80.0, on_straight=True, gap_ahead=0.8, closing_speed=1.5,
+                         gap_behind=None, compound=TyreCompound.MEDIUM, tyre_wear=0.4, wetness=0.0,
+                         flag=Flag.GREEN, overtaking_allowed=True, drs=False)
+for policy in BASELINES:
+    decision = policy(seen, Driver("Test"))
+    print(f"{policy.name:<12} {decision.action.name:<14} {decision.reason:<16} {decision.features}")
+
+# 2. A 6-lap race in which each car uses one policy (decisions are logged; they do not change the race yet)
+grid = [RaceCar(1, "Mercedes", CARS["Mercedes"], driver=Driver("Defender", racecraft=0.9)),
+        RaceCar(2, "McLaren", CARS["McLaren"], driver=Driver("Rookie", racecraft=0.1)),
+        RaceCar(3, "McLaren", CARS["McLaren"], driver=Driver("Veteran", racecraft=0.9))]
+log = run(Race(MonzaV0(), 6, grid), {1: CONSERVATIVE, 2: BALANCED, 3: AGGRESSIVE})
+for number, policy in ((1, CONSERVATIVE), (2, BALANCED), (3, AGGRESSIVE)):
+    counts = Counter(record.action.name for record in log if record.car == number)
+    print(f"#{number} {policy.name:<12}", dict(sorted(counts.items())))
+first = next(record for record in log if record.car == 2 and record.action.name == "ATTACK")
+print(f"first attack by #2: {first.time:.1f} s, lap {first.lap}, {first.reason},",
+      {name: round(value, 2) for name, value in first.features.items()})
+EOF
+```
+
+Expected output:
+
+```
+conservative CONSERVE_TYRES tyres_worn       {'tyre_wear': 0.4, 'conserve_from': 0.3}
+balanced     ATTACK         close_and_faster {'gap_ahead': 0.8, 'closing_speed': 1.5, 'needed': 1.0}
+aggressive   ATTACK         close_and_faster {'gap_ahead': 0.8, 'closing_speed': 1.5, 'needed': 0.3}
+#1 conservative {'ATTACK': 1, 'DEFEND': 3, 'MAINTAIN_PACE': 4}
+#2 balanced     {'ATTACK': 15, 'DEFEND': 19, 'MAINTAIN_PACE': 5}
+#3 aggressive   {'ATTACK': 28, 'DEFEND': 3, 'MAINTAIN_PACE': 27}
+first attack by #2: 0.0 s, lap 1, close_and_faster, {'gap_ahead': 0.14, 'closing_speed': 3.46, 'needed': 1.4}
+```
+
+- In the same situation, the conservative driver saves tyres (too far back to attack, and its tyres are past its 30 % trigger), while the other two attack.
+- The aggressive driver needs only 0.3 m/s more speed, against the balanced driver's 1.0.
+- In the race, each count is the number of times that car switched to that action.
 
 ## Requirements and setup
 
@@ -586,6 +646,7 @@ python3 test_rl.py              # V7 environment API, masks, rewards, terminatio
 python3 test_research.py        # V8 config validation, runner, statistics, CEM, decision rule, failures, stored results
 python3 test_tracks.py          # V9 segment types, banking physics, radius rule, all 28 circuits
 python3 test_drivers.py         # P2-V1 driver profile: defaults, validation, attack/defence, profile-only skills
+python3 test_driving.py         # P2-V2 driver observations, actions, policy interface, baselines, decision log
 ```
 
 Each file prints `ok` when all its tests pass. An assertion error means a test failed. The tests are plain `test_*` functions using only the standard library.
@@ -604,6 +665,7 @@ Each file prints `ok` when all its tests pass. An assertion error means a test f
 | `drivers.py` | `Driver` (pace, racecraft; P2-V1: attack, defence, tyre_management, consistency, wet_weather) |
 | `weather.py` | `WeatherPoint`, `Conditions`, `Weather` (timeline, wetness, track temperature) |
 | `traffic.py` | `TrafficRules` and rule functions: dirty air, DRS, overtaking |
+| `driving.py` | P2-V2: `DriverObservation`, `DriverAction`, `Decision`, `observe`, `decide`, `run`, `RuleBasedDriver` (`CONSERVATIVE`, `BALANCED`, `AGGRESSIVE`) |
 | `race_control.py` | `Flag`, `RaceControlRules`, `Incident`, `Penalty`, `ControlEvent`, `RaceControl` |
 | `race.py` | `RaceCar`, `OvertakeEvent`, `WeatherEvent`, `PitEvent`, `LapProfile`, `Race` |
 | `main.py` | Entry point |
