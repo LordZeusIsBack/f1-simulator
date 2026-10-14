@@ -126,7 +126,7 @@ def _factor(race, car) -> float:
 
 
 def _speed(race, car, distance: float) -> float:
-    return race._profiles[car.number].speed_at(distance) / _factor(race, car)
+    return race._speed(car, distance, _factor(race, car))  # a controlled car (P2-V3) reports its actual speed
 
 
 def observe(race, car) -> DriverObservation:
@@ -157,7 +157,8 @@ def observe(race, car) -> DriverObservation:
 def run(race, policies: dict[int, DriverPolicy], dt: float = 0.1) -> list[DecisionRecord]:
     """Run the race to the finish. Before every step each car with a policy decides; changes of action are logged.
 
-    The decisions do not affect the race in P2-V2: the finish times are the same as race.run(dt)."""
+    A car with a CarControl (P2-V3) carries its decision out: it becomes car.control.action, which sets the grip share
+    its controller drives at. For any other car the decision is only logged: the race is the same as race.run(dt)."""
     numbers = {car.number for car in race.cars}
     if not set(policies) <= numbers:
         raise ValueError(f"no car numbered {sorted(set(policies) - numbers)} in this race")
@@ -167,6 +168,8 @@ def run(race, policies: dict[int, DriverPolicy], dt: float = 0.1) -> list[Decisi
         for car in race.cars:
             if car.number in policies and race._on_track(car):
                 decision = decide(policies[car.number], observe(race, car), car.driver)
+                if car.control:
+                    car.control.action = decision.action
                 if last.get(car.number) is not decision.action:
                     log.append(DecisionRecord(race.time, car.number, car.laps + 1, *decision))
                     last[car.number] = decision.action

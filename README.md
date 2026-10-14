@@ -48,7 +48,7 @@ Phase 1 (V0–V9) built the race world and a pit-strategy agent. Phase 2 adds an
 |---|---|---|
 | P2-V1 Driver skills and profiles | **done** | [Implementation](docs/phase2/p2-v1/IMPLEMENTATION.md) · [Code flow](docs/phase2/p2-v1/CODE_FLOW.md) · [Changelog](docs/phase2/p2-v1/CHANGELOG.md) |
 | P2-V2 Driver decision interfaces and rule-based baseline policies | **done** | [Implementation](docs/phase2/p2-v2/IMPLEMENTATION.md) · [Code flow](docs/phase2/p2-v2/CODE_FLOW.md) · [Changelog](docs/phase2/p2-v2/CHANGELOG.md) |
-| P2-V3 On-track driving control | not started | |
+| P2-V3 On-track driving control | **done** | [Implementation](docs/phase2/p2-v3/IMPLEMENTATION.md) · [Code flow](docs/phase2/p2-v3/CODE_FLOW.md) · [Changelog](docs/phase2/p2-v3/CHANGELOG.md) |
 | P2-V4 Trainable AI driver | not started | |
 | P2-V5 Driver-versus-driver competition | not started | |
 | P2-V6 Hierarchical race intelligence | not started | |
@@ -122,6 +122,64 @@ first attack by #2: 0.0 s, lap 1, close_and_faster, {'gap_ahead': 0.14, 'closing
 - In the same situation, the conservative driver saves tyres (too far back to attack, and its tyres are past its 30 % trigger), while the other two attack.
 - The aggressive driver needs only 0.3 m/s more speed, against the balanced driver's 1.0.
 - In the race, each count is the number of times that car switched to that action.
+
+**P2-V3:** a car can be driven by pedals and physics instead of its precomputed lap profile. To opt in, use `RaceCar(..., control=CarControl())`.
+- Each physics sub-step (`control_step`, default 0.02 s), the controller looks ahead along a braking envelope and sets `Control(throttle, brake)`, each 0–1. The envelope gives the highest speed from which every corner ahead can still be made.
+- `step_motion` integrates speed and distance from the V0 forces: power, grip (friction circle), drag and gravity.
+- A corner's grip limit caps the speed, and `CarControl.clipped` counts any time it had to.
+- `driving.run` passes each policy decision to the car: `ATTACK`/`DEFEND` plan at 100 % of the grip, `MAINTAIN_PACE` at 97 % and `CONSERVE_TYRES` at 90 %.
+- Cars without `control` move exactly as before.
+
+**Limits:**
+- The model is longitudinal only: no racing line, so `DEFEND` drives like `ATTACK`.
+- Tyre wear does not yet depend on driving.
+
+Example: the same McLaren behind a Ferrari, with four policies (about 10 s):
+
+```bash
+python3 - <<'EOF'
+from collections import Counter
+
+from cars import CARS
+from control import CarControl
+from drivers import Driver
+from driving import AGGRESSIVE, BALANCED, CONSERVATIVE, Decision, DriverAction, run
+from race import Race, RaceCar
+from tracks import MonzaV0
+
+track = MonzaV0()
+
+
+def steady(observation, driver):
+    return Decision(DriverAction.MAINTAIN_PACE, "steady", {})
+
+
+# A Ferrari driven by its lap profile (as before P2-V3) leads a McLaren driven by pedals and physics.
+# Only the McLaren's driving policy changes between the runs.
+for name, policy in (("steady", steady), ("conservative", CONSERVATIVE), ("balanced", BALANCED),
+                     ("aggressive", AGGRESSIVE)):
+    grid = [RaceCar(1, "Ferrari", CARS["Ferrari"], driver=Driver("Leader")),
+            RaceCar(2, "McLaren", CARS["McLaren"], driver=Driver("Chaser"), control=CarControl())]
+    race = Race(track, 4, grid)
+    log = run(race, {2: policy})
+    chaser = grid[1]
+    passed = [f"{e.time:.1f} s" for e in race.overtakes if e.outcome == "passed" and e.attacker == 2]
+    switches = dict(sorted(Counter(record.action.name for record in log).items()))
+    print(f"{name:<12} Chaser {chaser.finish_time:.3f} s, passed at {passed or 'never'}, switches to {switches}")
+EOF
+```
+
+Expected output:
+
+```
+steady       Chaser 382.302 s, passed at never, switches to {'MAINTAIN_PACE': 1}
+conservative Chaser 382.302 s, passed at never, switches to {'ATTACK': 1, 'MAINTAIN_PACE': 1}
+balanced     Chaser 381.685 s, passed at never, switches to {'ATTACK': 21, 'MAINTAIN_PACE': 21}
+aggressive   Chaser 380.498 s, passed at ['204.7 s'], switches to {'ATTACK': 31, 'DEFEND': 1, 'MAINTAIN_PACE': 31}
+```
+
+- The more a policy attacks, the more time the McLaren spends at full grip (later braking, faster corners), and the sooner it finishes.
+- Only the aggressive policy is fast enough often enough to pass, with DRS on lap 3.
 
 ## Requirements and setup
 
@@ -647,6 +705,7 @@ python3 test_research.py        # V8 config validation, runner, statistics, CEM,
 python3 test_tracks.py          # V9 segment types, banking physics, radius rule, all 28 circuits
 python3 test_drivers.py         # P2-V1 driver profile: defaults, validation, attack/defence, profile-only skills
 python3 test_driving.py         # P2-V2 driver observations, actions, policy interface, baselines, decision log
+python3 test_control.py         # P2-V3 pedals, motion integration, braking look-ahead, controlled cars, policies moving cars
 ```
 
 Each file prints `ok` when all its tests pass. An assertion error means a test failed. The tests are plain `test_*` functions using only the standard library.
@@ -666,6 +725,7 @@ Each file prints `ok` when all its tests pass. An assertion error means a test f
 | `weather.py` | `WeatherPoint`, `Conditions`, `Weather` (timeline, wetness, track temperature) |
 | `traffic.py` | `TrafficRules` and rule functions: dirty air, DRS, overtaking |
 | `driving.py` | P2-V2: `DriverObservation`, `DriverAction`, `Decision`, `observe`, `decide`, `run`, `RuleBasedDriver` (`CONSERVATIVE`, `BALANCED`, `AGGRESSIVE`) |
+| `control.py` | P2-V3: `Control`, `CarControl`, `acceleration`, `step_motion`, `track_speed`, `BrakingEnvelope`, `STYLES` |
 | `race_control.py` | `Flag`, `RaceControlRules`, `Incident`, `Penalty`, `ControlEvent`, `RaceControl` |
 | `race.py` | `RaceCar`, `OvertakeEvent`, `WeatherEvent`, `PitEvent`, `LapProfile`, `Race` |
 | `main.py` | Entry point |

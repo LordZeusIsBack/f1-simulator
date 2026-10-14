@@ -5,8 +5,10 @@ from functools import lru_cache
 from itertools import accumulate
 
 from abstract_classes import Car, Track, TrackSegment, TyreCompound
+from control import (CLIP_TOLERANCE, CONTROL_STEP, MAX_CONTROL_STEP, STYLES, CarControl, braking_envelope, step_motion,
+                     track_speed)
 from drivers import Driver
-from physics import TYRE_GRIP
+from physics import TYRE_GRIP, corner_speed
 from race_control import Flag, Incident, Penalty, RaceControl
 from simulation import simulate_lap, track_points
 from strategy import PitStop, Strategy
@@ -44,6 +46,7 @@ class RaceCar:
     retired_at: float | None = None  # s of race time when the car stopped for good
     penalty_time: float = 0.0  # s of time penalties, added to the finish time
     drive_throughs: int = 0  # drive-through penalties still to serve
+    control: CarControl | None = None  # P2-V3: moved by pedals and physics; None = by the lap profile (as before)
 
 
 @dataclass(frozen=True)
@@ -132,6 +135,7 @@ class Race:
         traffic: TrafficRules | None = TrafficRules(),
         weather: Weather | None = None,
         race_control: RaceControl | None = None,
+        control_step: float = CONTROL_STEP,
     ):
         if not isinstance(laps, int) or laps < 1:
             raise ValueError(f"laps must be a positive integer, got {laps!r}")
@@ -141,6 +145,8 @@ class Race:
             raise ValueError("car numbers must be unique")
         if pit_loss < 0 or fuel_per_lap < 0:
             raise ValueError("pit_loss and fuel_per_lap cannot be negative")
+        if not 0 < control_step <= MAX_CONTROL_STEP:
+            raise ValueError(f"control_step must be in (0, {MAX_CONTROL_STEP}] s, got {control_step!r}")
         if weather is not None and weather.time != 0:
             raise ValueError("weather must start at time 0: use a new Weather for each race")
         if race_control is not None:
@@ -162,6 +168,7 @@ class Race:
         self.traffic = traffic  # None: cars ignore each other (V2 behaviour)
         self.weather = weather  # None: always dry (V3 behaviour)
         self.race_control = race_control  # None: always green, no incidents or penalties (V4 behaviour)
+        self.control_step = control_step  # s, physics sub-step for cars with a CarControl
         self.weather_events: list[WeatherEvent] = []
         self._grip_wetness = weather.wetness if weather else 0.0  # wetness the current lap profiles were built for
         self.time = 0.0  # s since the start
@@ -184,6 +191,9 @@ class Race:
             car.drs, car.attack, car.held_by = False, None, None
             car.retired_at, car.penalty_time, car.drive_throughs = None, 0.0, 0
             self._profiles[car.number] = self._profile(car)
+            if car.control:  # a flying start at the profile's speed, like every other car
+                car.control.speed = self._profiles[car.number].speed_at(car.distance)
+                car.control.clipped = 0
 
     def _check(self, number: int, strategy: Strategy) -> None:
         """Reject a plan that breaks the pit rules or runs out of fuel, before the race starts."""
@@ -388,6 +398,8 @@ class Race:
         """Move one car up to race time `end` (or up to `limit` m), handling every line crossing and pit stop.
 
         `factor` stretches the car's profile time: 1.02 means 2 % slower than its flying lap."""
+        if car.control:
+            return self._advance_controlled(car, end, factor, limit)
         clock = self.time
         while car.finish_time is None:
             clock = max(clock, car.pit_exit)  # a car in the pits waits there
@@ -411,6 +423,54 @@ class Race:
             if line > 0:
                 self._complete_lap(car, clock)
 
+    def _advance_controlled(self, car: RaceCar, end: float, factor: float, limit: float | None) -> None:
+        """P2-V3: move a controlled car up to race time `end` in physics sub-steps of at most control_step s.
+
+        Each sub-step: the controller aims for the braking envelope of its action's grip share (divided by `factor`,
+        so pace, dirty air and flags still slow it), step_motion integrates the pedals, the corner's real grip limit
+        caps the speed, and the line, pit stops and the car ahead (`limit`) are handled as in _advance."""
+        clock = self.time
+        while car.finish_time is None:
+            clock = max(clock, car.pit_exit)  # a car in the pits waits there, keeping its speed
+            if clock >= end:
+                return
+            line = self._next_line(car)
+            lap_distance = car.distance - (line - self.track.length)
+            h = min(self.control_step, end - clock)
+            spec = replace(car.car.specification, mass=car.car.specification.mass + car.fuel)
+            grip = car.tyres.grip(self.compounds, self._grip_wetness)
+            envelope = braking_envelope(car.car, self.track, grip * STYLES[car.control.action], car.fuel)
+            v = car.control.speed
+            point = envelope.point(lap_distance)
+            pedals = track_speed(spec, v, envelope.target(lap_distance + v * h) / factor, point, grip, h)
+            v_new, ds = step_motion(spec, v, point, grip, pedals, h)
+            _, radius, _, banking = envelope.point(lap_distance + ds)
+            most = corner_speed(spec, radius, grip, banking)
+            if v_new > most + CLIP_TOLERANCE:  # the 1-D model cannot leave the track: count it, then cap
+                car.control.clipped += 1
+            v_new = min(v_new, most)
+            new = car.distance + ds
+            if limit is not None and new > limit:  # caught the car ahead: stay behind it, at no more than its speed
+                new, v_new = max(car.distance, limit), min(v_new, self._held_speed(car))
+            if new >= line:  # crosses the line inside this sub-step: finish the lap at the interpolated time
+                share = (line - car.distance) / (new - car.distance)
+                clock += share * h
+                car.distance, car.control.speed = line, v + share * (v_new - v)
+                if line > 0:
+                    self._complete_lap(car, clock)
+                continue
+            car.distance, car.control.speed = new, v_new
+            clock += h
+
+    def _held_speed(self, car: RaceCar) -> float:
+        """m/s of the car ahead (its own speed if controlled, else its profile speed with its pace)."""
+        ahead = self.car_ahead(car)
+        if ahead is None:
+            return car.control.speed
+        if ahead.control:
+            return ahead.control.speed
+        return self._profiles[ahead.number].speed_at(ahead.distance) / ahead.driver.time_factor()
+
     def _next_line(self, car: RaceCar) -> float:
         """m at which the car next crosses the line: 0 from the grid, else the end of its current lap."""
         return (car.laps + 1) * self.track.length if car.distance >= 0 else 0.0
@@ -426,12 +486,16 @@ class Race:
 
     def _free_distance(self, car: RaceCar, end: float, factor: float) -> float:
         """m the car would reach by `end` with nobody in its way (current lap profile, no line logic)."""
+        if car.control:  # controlled: at its present speed
+            return car.distance + car.control.speed * (end - self.time)
         lap_start = self._next_line(car) - self.track.length
         profile = self._profiles[car.number]
         return lap_start + profile.distance_at(profile.time_at(car.distance - lap_start) + (end - self.time) / factor)
 
     def _speed(self, car: RaceCar, distance: float, factor: float) -> float:
         """m/s the car would do at `distance`, from its current lap profile and this step's time factor."""
+        if car.control:  # controlled: its actual speed now, wherever it is
+            return car.control.speed
         return self._profiles[car.number].speed_at(distance) / factor
 
     def car_ahead(self, car: RaceCar) -> RaceCar | None:
