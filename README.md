@@ -49,13 +49,13 @@ Phase 1 (V0–V9) built the race world and a pit-strategy agent. Phase 2 adds an
 | P2-V1 Driver skills and profiles | **done** | [Implementation](docs/phase2/p2-v1/IMPLEMENTATION.md) · [Code flow](docs/phase2/p2-v1/CODE_FLOW.md) · [Changelog](docs/phase2/p2-v1/CHANGELOG.md) |
 | P2-V2 Driver decision interfaces and rule-based baseline policies | **done** | [Implementation](docs/phase2/p2-v2/IMPLEMENTATION.md) · [Code flow](docs/phase2/p2-v2/CODE_FLOW.md) · [Changelog](docs/phase2/p2-v2/CHANGELOG.md) |
 | P2-V3 On-track driving control | **done** | [Implementation](docs/phase2/p2-v3/IMPLEMENTATION.md) · [Code flow](docs/phase2/p2-v3/CODE_FLOW.md) · [Changelog](docs/phase2/p2-v3/CHANGELOG.md) |
-| P2-V4 Trainable AI driver | not started | |
+| P2-V4 Trainable AI driver | **done** | [Implementation](docs/phase2/p2-v4/IMPLEMENTATION.md) · [Code flow](docs/phase2/p2-v4/CODE_FLOW.md) · [Changelog](docs/phase2/p2-v4/CHANGELOG.md) |
 | P2-V5 Driver-versus-driver competition | not started | |
 | P2-V6 Hierarchical race intelligence | not started | |
 
 **P2-V1:** `Driver` gains five skills, each 0–1:
 - `attack` and `defence` split the V3 `racecraft` term of the overtaking rule. The speed advantage a pass needs is now 2.0 − 1.0 × (attacker's `attack` − defender's `defence`) m/s. Both default to the driver's `racecraft`, so existing profiles and results are unchanged.
-- `tyre_management`, `consistency` and `wet_weather` are **profile only**: stored and validated, with no effect on a race yet. Their planned mechanisms are in the [implementation notes](docs/phase2/p2-v1/IMPLEMENTATION.md#4-the-profile-attribute-by-attribute).
+- `tyre_management`, `consistency` and `wet_weather` are **profile only**: stored and validated, with no effect on a race yet. Their planned mechanisms are in the [implementation notes](docs/phase2/p2-v1/IMPLEMENTATION.md#4-the-profile-attribute-by-attribute). Since P2-V4, `tyre_management` sets the tyre wear of controlled cars.
 
 ```python
 Driver("Rookie", racecraft=0.1, defence=0.9)  # attacks like racecraft 0.1, defends like 0.9
@@ -132,7 +132,7 @@ first attack by #2: 0.0 s, lap 1, close_and_faster, {'gap_ahead': 0.14, 'closing
 
 **Limits:**
 - The model is longitudinal only: no racing line, so `DEFEND` drives like `ATTACK`.
-- Tyre wear does not yet depend on driving.
+- Tyre wear did not depend on driving until P2-V4.
 
 Example: the same McLaren behind a Ferrari, with four policies (about 10 s):
 
@@ -172,14 +172,70 @@ EOF
 Expected output:
 
 ```
-steady       Chaser 382.302 s, passed at never, switches to {'MAINTAIN_PACE': 1}
-conservative Chaser 382.302 s, passed at never, switches to {'ATTACK': 1, 'MAINTAIN_PACE': 1}
-balanced     Chaser 381.685 s, passed at never, switches to {'ATTACK': 21, 'MAINTAIN_PACE': 21}
-aggressive   Chaser 380.498 s, passed at ['204.7 s'], switches to {'ATTACK': 31, 'DEFEND': 1, 'MAINTAIN_PACE': 31}
+steady       Chaser 382.342 s, passed at never, switches to {'MAINTAIN_PACE': 1}
+conservative Chaser 382.342 s, passed at never, switches to {'ATTACK': 1, 'MAINTAIN_PACE': 1}
+balanced     Chaser 381.930 s, passed at never, switches to {'ATTACK': 21, 'MAINTAIN_PACE': 21}
+aggressive   Chaser 381.629 s, passed at never, switches to {'ATTACK': 59, 'MAINTAIN_PACE': 59}
 ```
 
 - The more a policy attacks, the more time the McLaren spends at full grip (later braking, faster corners), and the sooner it finishes.
-- Only the aggressive policy is fast enough often enough to pass, with DRS on lap 3.
+- None of them gets past the Ferrari in 4 laps: the passing rule needs 2.0 m/s more speed on a straight, and DRS does not help a controlled car.
+- Until P2-V4 this output showed the aggressive policy passing on lap 3. That pass came from a bug: DRS let the controlled car brake too late (fixed in P2-V4, see its [changelog](docs/phase2/p2-v4/CHANGELOG.md)).
+
+**P2-V4:** a reinforcement-learning environment for **driving**, `rl/driver_env.py`, separate from the strategist's `rl/env.py` (which is unchanged). Standard library only; Gymnasium-style signatures.
+- **One episode** is one race (default: 5 laps of Monza, McLaren, 3 rivals with random skills, random grid slot, mediums, dry, no pit stops). The agent drives car 1 through the P2-V3 controller.
+- **Decision** every 250 m: an action index into `ACTIONS` = `MAINTAIN_PACE`, `ATTACK`, `DEFEND`, `CONSERVE_TYRES`. `info["action_mask"]` applies P2-V2's rule: `ATTACK` needs a car ahead, `DEFEND` a car behind.
+- **Observation:** 10 normalised floats (progress, speed, on a straight, gaps and closing speed, held up, DRS, tyre wear, position). It contains no skills, no scenario and no wear price.
+- **Reward:** −(seconds lost against the ideal lap + `wear_price` × tyre wear added). The default `wear_price` is 130 s per unit of wear, a placeholder.
+- **New in the simulator:** a controlled car's tyre wear now depends on how hard it is driven. Per metre it is `wear_factor(grip share, tyre_management)` times the full-push rate, so `CONSERVE_TYRES` saves tyres and a better tyre manager saves more. Cars without `CarControl` are unchanged.
+
+```bash
+python3 - <<'EOF'
+from rl.driver_env import DriverEnv
+from rl.driver_learning import baselines, run_episode
+
+env = DriverEnv()  # 5 laps of Monza, McLaren, 3 rivals, mediums, dry, wear price 130 s
+observation, info = env.reset(seed=1)
+result = env.step(0)  # one decision: MAINTAIN_PACE for the next 250 m
+print(info["action_mask"], round(result.reward, 4), round(result.info["time_lost"], 4), round(result.info["wear_cost"], 4))
+
+for name, policy in baselines(env.driver).items():  # whole episodes, same seed
+    e = run_episode(env, policy, seed=1)
+    print(f"{name:<18} cost {-e['return']:6.2f} s = time lost {e['time_lost']:5.2f} + wear {e['wear_cost']:5.2f}, "
+          f"P{e['position']}, passes {e['passes']}")
+EOF
+```
+
+Expected output (about 30 s):
+
+```
+(True, True, False, True) -0.1265 -0.0 0.1266
+maintain           cost  21.70 s = time lost  6.42 + wear 15.28, P4, passes 2
+push               cost  24.59 s = time lost  5.09 + wear 19.50, P4, passes 4
+conserve           cost  21.18 s = time lost 12.78 + wear  8.39, P4, passes 0
+rule conservative  cost  21.97 s = time lost  5.46 + wear 16.51, P3, passes 5
+rule balanced      cost  22.79 s = time lost  6.19 + wear 16.60, P4, passes 2
+rule aggressive    cost  23.46 s = time lost  5.56 + wear 17.91, P4, passes 3
+```
+
+Train tabular Q-learning and compare it with the baselines on held-out seeds:
+
+```bash
+python3 -m rl.driver_learning --smoke   # pipeline check in about 10 s (not a result)
+python3 -m rl.driver_learning           # the experiment -> rl/reports/driver_experiment.{json,md}
+```
+
+Result of the committed experiment ([report](rl/reports/driver_experiment.md), [analysis](docs/phase2/p2-v4/IMPLEMENTATION.md#6-results)): 3 Q-learning runs of 300 episodes per wear price, compared on 30 held-out races with the best baseline:
+
+| Wear price | Best baseline (mean cost) | Q-learning runs, paired difference (95 % CI) | Verdict |
+|---|---|---|---|
+| 130 s (main) | rule conservative (19.49 s) | +1.11 [+0.81, +1.42], +1.34 [+0.99, +1.67], +0.74 [+0.58, +0.90] s | worse in all 3 runs |
+| 0 s (control: the best policy is known to be `push`) | push (0.88 s) | −0.00 [−0.23, +0.19], +0.19 [−0.00, +0.46], +0.74 [+0.37, +1.18] s | finds the optimum in 1–2 of 3 runs |
+
+- **The trained driver is not better than the rule-based baseline.** Its training reward rose, but that did not make its held-out results better.
+- At the main wear price, pushing and holding back cost almost the same per decision, so the learner gets very little signal from each step.
+
+The wear model and the wear price are placeholders, and the environment covers one track and one dry 5-lap race with non-reacting rivals. These results describe this simulator only.
 
 ## Requirements and setup
 
@@ -579,6 +635,8 @@ The calibrated grip (2.48 since V9, 2.94 in V6) is an **effective** value that a
 
 ## RL environment (V7)
 
+This is the **strategist** environment: it decides pit stops. The **driver** environment is `rl/driver_env.py` (see P2-V4 under [Phase 2](#phase-2-ai-driver-in-progress)). The two are separate.
+
 `rl/env.py` needs no extra installation: it uses the standard library only. Its signatures follow Gymnasium, so a `gymnasium.Env` wrapper can be added later.
 
 - **One episode** is one race. The agent controls one car's pit stops.
@@ -706,6 +764,7 @@ python3 test_tracks.py          # V9 segment types, banking physics, radius rule
 python3 test_drivers.py         # P2-V1 driver profile: defaults, validation, attack/defence, profile-only skills
 python3 test_driving.py         # P2-V2 driver observations, actions, policy interface, baselines, decision log
 python3 test_control.py         # P2-V3 pedals, motion integration, braking look-ahead, controlled cars, policies moving cars
+python3 test_driver_env.py      # P2-V4 driving-dependent wear, driver environment contracts, baselines, Q-learning, experiment
 ```
 
 Each file prints `ok` when all its tests pass. An assertion error means a test failed. The tests are plain `test_*` functions using only the standard library.
@@ -719,18 +778,18 @@ Each file prints `ok` when all its tests pass. An assertion error means a test f
 | `tracks.py` | `CIRCUITS` (28 approximate real circuits), the builders `turn`, `hairpin`, `chicane`, `esses`, `spiral`, `straight`, `radius_for`; `MonzaV0` |
 | `physics.py` | Aerodynamic force, corner speed limit, acceleration and braking (grip is an input) |
 | `simulation.py` | `track_points`, `simulate_lap` (V0 flying lap) |
-| `tyres.py` | `Compound`, `COMPOUNDS`, `DRY_COMPOUNDS`, `Tyres` (wear, wet grip), `best_compound` |
+| `tyres.py` | `Compound`, `COMPOUNDS`, `DRY_COMPOUNDS`, `Tyres` (wear, wet grip; P2-V4: `used`), `best_compound` |
 | `strategy.py` | `PitStop`, `Strategy` |
 | `drivers.py` | `Driver` (pace, racecraft; P2-V1: attack, defence, tyre_management, consistency, wet_weather) |
 | `weather.py` | `WeatherPoint`, `Conditions`, `Weather` (timeline, wetness, track temperature) |
 | `traffic.py` | `TrafficRules` and rule functions: dirty air, DRS, overtaking |
 | `driving.py` | P2-V2: `DriverObservation`, `DriverAction`, `Decision`, `observe`, `decide`, `run`, `RuleBasedDriver` (`CONSERVATIVE`, `BALANCED`, `AGGRESSIVE`) |
-| `control.py` | P2-V3: `Control`, `CarControl`, `acceleration`, `step_motion`, `track_speed`, `BrakingEnvelope`, `STYLES` |
+| `control.py` | P2-V3: `Control`, `CarControl`, `acceleration`, `step_motion`, `track_speed`, `BrakingEnvelope`, `STYLES`; P2-V4: `wear_factor`, `WEAR_EXPONENT` |
 | `race_control.py` | `Flag`, `RaceControlRules`, `Incident`, `Penalty`, `ControlEvent`, `RaceControl` |
 | `race.py` | `RaceCar`, `OvertakeEvent`, `WeatherEvent`, `PitEvent`, `LapProfile`, `Race` |
 | `main.py` | Entry point |
 | `research/` | V8: `config`, `runner`, `stats`, `cem`, `scenario_coverage`, `configs/`, `results/` |
-| `rl/` | V7: `env` (StrategyEnv), `policies` (baselines), `evaluate`, `experiment`, `reports/` |
+| `rl/` | V7: `env` (StrategyEnv), `policies` (baselines), `evaluate`, `experiment`, `reports/`; P2-V4: `driver_env` (DriverEnv), `driver_learning` (driving baselines, Q-learning, experiment) |
 | `validation/` | V6 tooling: `fetch_reference`, `reference` (load/convert), `metrics`, `model`, `calibrate`, `evaluate`, `config/`, `reports/` |
 | `data/reference/` | V6 reference data (raw API responses), its provenance and its own licence (`LICENSE.md`) |
 | `NOTICE` | Third-party material and credits |

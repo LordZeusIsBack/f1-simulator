@@ -202,8 +202,9 @@ The race step `dt` sets how often policies decide. `control_step` sets the physi
 ## 9. Assumptions, limitations and known weaknesses
 
 - **No lateral model.** There is no racing line, lane, side-by-side running or defensive weaving. `DEFEND` drives exactly like `ATTACK`.
-- **`CONSERVE_TYRES` has a cost but no benefit.** It is slower, but wear is still per lap. Before an RL driver is trained (P2-V4), wear must depend on how hard the car is driven, or a learner will simply never conserve.
+- **`CONSERVE_TYRES` has a cost but no benefit.** It is slower, but wear is still per lap. Before an RL driver is trained (P2-V4), wear must depend on how hard the car is driven, or a learner will simply never conserve. (Done in P2-V4 for controlled cars.)
 - **DRS and dirty air act on the target only.** A controlled car is already at full throttle on straights, so DRS gives it nothing. Dirty air lowers its corner target. Physical versions (less drag, less downforce) are not modelled.
+  - **Correction (P2-V4):** the DRS part was not true in P2-V3. Dividing the target by the DRS factor (0.965) also raised it in the braking zone at the end of the straight, so the car braked too late and the corner cap removed the excess for free. P2-V4 divides by `max(factor, 1)`, which makes the statement true. See [P2-V4 IMPLEMENTATION.md §3.2](../p2-v4/IMPLEMENTATION.md#32-bug-fix-drs-let-a-controlled-car-brake-too-late-p2-v3).
 - **Held behind a car:** the controlled car is placed at the limit and its speed capped at the car ahead's. For an uncontrolled car ahead, that speed is its profile speed ÷ its pace, ignoring its flags and dirty air.
 - **Mixed fields.** Profile cars still "teleport" back to profile speed after being held up, while controlled cars accelerate through physics. In mixed races that is a small disadvantage for controlled cars.
 - **Clips can still occur:**
@@ -216,6 +217,8 @@ The race step `dt` sets how often policies decide. `control_step` sets the physi
 - **Placeholder numbers:** `STYLES`, `CONTROL_STEP` and `MAX_CONTROL_STEP` are chosen, not measured. The forces themselves come from the unchanged V0 physics, with its simplifications (for example, braking near 7–8 g at Monza's top speed).
 
 ## 10. Worked example (Monza, 4 laps)
+
+> **Correction (P2-V4):** the aggressive policy's pass in this table relied on the DRS bug described in §9. With the fix, none of the four policies passes and the times are 382.342 / 382.342 / 381.930 / 381.629 s (README). The braking trace in CODE_FLOW.md is on lap 2, before DRS is enabled, but it shifts slightly: P2-V4's driving-dependent wear leaves the tyres less worn after lap 1 (grip 1.7973 instead of 1.79676), and the traced step ends at 93.994 m/s instead of 93.970.
 
 A Ferrari driven by its profile leads a McLaren with `CarControl()`. Both drivers are default and fictional ("Leader", "Chaser"). Only the McLaren's policy changes (README example):
 

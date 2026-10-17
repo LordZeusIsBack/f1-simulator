@@ -6,7 +6,7 @@ from itertools import accumulate
 
 from abstract_classes import Car, Track, TrackSegment, TyreCompound
 from control import (CLIP_TOLERANCE, CONTROL_STEP, MAX_CONTROL_STEP, STYLES, CarControl, braking_envelope, step_motion,
-                     track_speed)
+                     track_speed, wear_factor)
 from drivers import Driver
 from physics import TYRE_GRIP, corner_speed
 from race_control import Flag, Incident, Penalty, RaceControl
@@ -193,7 +193,7 @@ class Race:
             self._profiles[car.number] = self._profile(car)
             if car.control:  # a flying start at the profile's speed, like every other car
                 car.control.speed = self._profiles[car.number].speed_at(car.distance)
-                car.control.clipped = 0
+                car.control.clipped, car.control.load = 0, 0.0
 
     def _check(self, number: int, strategy: Strategy) -> None:
         """Reject a plan that breaks the pit rules or runs out of fuel, before the race starts."""
@@ -426,8 +426,8 @@ class Race:
     def _advance_controlled(self, car: RaceCar, end: float, factor: float, limit: float | None) -> None:
         """P2-V3: move a controlled car up to race time `end` in physics sub-steps of at most control_step s.
 
-        Each sub-step: the controller aims for the braking envelope of its action's grip share (divided by `factor`,
-        so pace, dirty air and flags still slow it), step_motion integrates the pedals, the corner's real grip limit
+        Each sub-step: the controller aims for the braking envelope of its action's grip share (divided by `factor`
+        when it is above 1, so pace, dirty air and flags still slow it; DRS has no effect), step_motion integrates the pedals, the corner's real grip limit
         caps the speed, and the line, pit stops and the car ahead (`limit`) are handled as in _advance."""
         clock = self.time
         while car.finish_time is None:
@@ -442,7 +442,8 @@ class Race:
             envelope = braking_envelope(car.car, self.track, grip * STYLES[car.control.action], car.fuel)
             v = car.control.speed
             point = envelope.point(lap_distance)
-            pedals = track_speed(spec, v, envelope.target(lap_distance + v * h) / factor, point, grip, h)
+            # factor only slows the car: DRS (factor < 1) must not lift the target above what the car can brake from
+            pedals = track_speed(spec, v, envelope.target(lap_distance + v * h) / max(factor, 1.0), point, grip, h)
             v_new, ds = step_motion(spec, v, point, grip, pedals, h)
             _, radius, _, banking = envelope.point(lap_distance + ds)
             most = corner_speed(spec, radius, grip, banking)
@@ -452,13 +453,17 @@ class Race:
             new = car.distance + ds
             if limit is not None and new > limit:  # caught the car ahead: stay behind it, at no more than its speed
                 new, v_new = max(car.distance, limit), min(v_new, self._held_speed(car))
+            wear = wear_factor(STYLES[car.control.action], car.driver.tyre_management)
             if new >= line:  # crosses the line inside this sub-step: finish the lap at the interpolated time
                 share = (line - car.distance) / (new - car.distance)
                 clock += share * h
+                car.control.load += (line - car.distance) * wear
                 car.distance, car.control.speed = line, v + share * (v_new - v)
                 if line > 0:
                     self._complete_lap(car, clock)
+                car.control.load = 0.0  # from the grid, wear counts from the start line, as for every car
                 continue
+            car.control.load += (new - car.distance) * wear
             car.distance, car.control.speed = new, v_new
             clock += h
 
@@ -513,7 +518,11 @@ class Race:
         """At the line: burn the lap's fuel, age the tyres, then finish or follow the strategy."""
         car.laps += 1
         car.fuel -= self.fuel_per_lap
-        car.tyres = replace(car.tyres, laps=car.tyres.laps + 1)
+        if car.control:  # P2-V4: the lap's wear follows how hard it was driven
+            used = car.tyres.laps if car.tyres.used is None else car.tyres.used
+            car.tyres = replace(car.tyres, laps=car.tyres.laps + 1, used=used + car.control.load / self.track.length)
+        else:
+            car.tyres = replace(car.tyres, laps=car.tyres.laps + 1)
         if car.laps == self.laps:
             car.finish_time = clock
             if self.race_control:

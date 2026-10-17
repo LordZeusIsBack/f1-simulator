@@ -21,13 +21,14 @@ from simulation import track_points
 CONTROL_STEP = 0.02  # s, default physics sub-step (≈ 1.8 m at 90 m/s, about the 1 m track resolution)
 MAX_CONTROL_STEP = 0.05  # s, largest sub-step allowed (≈ 4.5 m at 90 m/s): beyond it braking points smear
 CLIP_TOLERANCE = 1e-6  # m/s over a corner's limit before CarControl.clipped counts it (ignores float rounding)
+WEAR_EXPONENT = 8.0  # P2-V4: wear ∝ grip share ^ (WEAR_EXPONENT × (0.5 + tyre_management)), placeholder
 
 # Share of the tyre grip the controller plans to use, per tactical action. Placeholders, not data.
 STYLES = {
     DriverAction.ATTACK: 1.0,  # at the limit
     DriverAction.DEFEND: 1.0,  # no lateral model: defending = pushing at the limit to keep the gap
     DriverAction.MAINTAIN_PACE: 0.97,  # a margin kept over a race distance
-    DriverAction.CONSERVE_TYRES: 0.90,  # slower; tyre wear does not depend on it yet
+    DriverAction.CONSERVE_TYRES: 0.90,  # slower, and wears the tyres less (wear_factor)
 }
 
 
@@ -55,6 +56,13 @@ class CarControl:
     action: DriverAction = DriverAction.MAINTAIN_PACE  # what the controller carries out; driving.run updates it
     speed: float = 0.0  # m/s, set by Race at the start, then integrated
     clipped: int = 0  # sub-steps in which the corner's grip limit capped the speed (0 for a well-driven car)
+    load: float = 0.0  # P2-V4: m driven this lap, each weighted by wear_factor; becomes Tyres.used at the line
+
+
+def wear_factor(grip_share: float, tyre_management: float) -> float:
+    """Tyre wear per metre relative to driving at the limit: 1 at grip share 1, less below it. A better tyre manager
+    saves more wear for the same grip margin (exponent 4 at skill 0, 8 at 0.5, 12 at 1)."""
+    return grip_share ** (WEAR_EXPONENT * (0.5 + tyre_management))
 
 
 def acceleration(spec: CarSpecification, v: float, radius: float, gradient: float, tyre_grip: float, banking: float,

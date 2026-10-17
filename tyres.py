@@ -32,10 +32,11 @@ class Tyres:
     """The set fitted to a car: its compound and how many laps it has done."""
     compound: TyreCompound
     laps: int = 0
+    used: float | None = None  # P2-V4: laps' worth of wear at full push (controlled cars); None = equal to laps
 
     def wear(self, compounds: dict[TyreCompound, Compound] = COMPOUNDS) -> float:
-        """0 = new, 1 = fully worn. Linear in laps, then stays at 1 (no failure model)."""
-        return min(1.0, self.laps * compounds[self.compound].wear_per_lap)
+        """0 = new, 1 = fully worn. Linear in laps (or `used`), then stays at 1 (no failure model)."""
+        return min(1.0, (self.laps if self.used is None else self.used) * compounds[self.compound].wear_per_lap)
 
     def grip(self, compounds: dict[TyreCompound, Compound] = COMPOUNDS, wetness: float = 0.0) -> float:
         compound = compounds[self.compound]

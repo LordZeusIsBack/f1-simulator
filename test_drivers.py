@@ -95,7 +95,8 @@ def test_defence_alone_decides_whether_a_pass_happens():
 
 
 def test_profile_only_skills_do_not_change_a_race_yet():
-    """Guards the P2-V1 documentation's claim: these skills are stored, not used. Wet race, tyre wear, traffic."""
+    """Guards the P2-V1 documentation's claim: these skills are stored, not used. Wet race, tyre wear, traffic.
+    Since P2-V4, tyre_management sets the wear of cars with a CarControl (test_driver_env); these cars have none."""
     def race(value):
         skills = dict.fromkeys(PROFILE_ONLY, value)
         grid = [RaceCar(1, "A", FAST, Strategy(TyreCompound.SOFT, 20.0), Driver(pace=0.5, **skills)),

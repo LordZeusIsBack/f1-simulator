@@ -53,6 +53,8 @@ log = run(race, {2: AGGRESSIVE})
 
 ## 3. The scene
 
+> **Correction (P2-V4):** since P2-V4's driving-dependent wear, the McLaren reaches this point with less worn tyres (grip 1.7973 instead of 1.79676), and the traced step ends at 93.994 m/s instead of 93.970. The steps below are the P2-V3 values.
+
 Lap 2, race time 107.9 s. The first corner of `MonzaV0` (segment 1, radius 14 m) starts 1,210 m into the lap, at the end of the main straight. The McLaren is 1,089.9 m into the lap at 97.886 m/s, about 17 m behind the Ferrari. Its tyres are mediums with 3 % wear (grip 1.79676), and it carries 5.7 kg of fuel (mass 805.7 kg).
 
 ## 4. One race step, from observation to new position

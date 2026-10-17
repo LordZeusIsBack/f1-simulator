@@ -6499,9 +6499,9 @@
  "failed_episodes": 0,
  "python": "3.12.3",
  "revision": {
-  "code_digest": "3f84b8fcc55d642277f3fe056d71b017f533dcf9a637a56c8b1c00e4f062eaf4",
+  "code_digest": "a282894cbe57cb173483aaf44ea4fe4375f3dd06c30a780990b285ef4d768e2f",
   "dirty": true,
-  "git_head": "f402a05b99528132906ecc5d89c4ddb55c007fe1"
+  "git_head": "f5ff307b84e1b8478fcb8862dd3b7ddcd8625411"
  },
  "status": "complete",
  "training": [
@@ -6728,5 +6728,5 @@
    "train_score": -55.423303096228736
   }
  ],
- "wall_time_s": 2074.9
+ "wall_time_s": 3094.6
 }
